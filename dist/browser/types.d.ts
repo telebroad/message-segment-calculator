@@ -1,0 +1,32 @@
+import type { RcsRegion } from '../libs/RcsSegmentedMessage';
+export type EncodingKind = 'gsm7' | 'unicode' | 'rcs';
+export type SmsEncodingSetting = 'auto' | 'GSM-7' | 'UCS-2';
+export interface SegmentData {
+    index: number;
+    capacity: number;
+    used: number;
+}
+export interface SmsAnalysis {
+    encoding: EncodingKind;
+    encodingLabel: string;
+    segments: SegmentData[];
+    segmentsCount: number;
+    characters: number;
+    remaining: number;
+    messageSize: number;
+    totalSize: number;
+    unicodeScalars: number;
+    nonGsmCharacters: string[];
+    warnings: string[];
+}
+export interface RcsAnalysis {
+    encoding: EncodingKind;
+    encodingLabel: string;
+    region: RcsRegion;
+    segments: SegmentData[];
+    segmentsCount: number;
+    characters: number;
+    remaining: number;
+    messageSize: number;
+    messageType: string;
+}

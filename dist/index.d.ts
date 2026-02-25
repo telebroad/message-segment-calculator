@@ -1,2 +1,2 @@
-import { SegmentedMessage } from './libs/SegmentedMessage';
-export { SegmentedMessage };
+export { SegmentedMessage } from './libs/SegmentedMessage';
+export { RcsSegmentedMessage } from './libs/RcsSegmentedMessage';

@@ -1,0 +1,151 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.renderRcs = exports.renderSms = void 0;
+var clearChildren = function (element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+};
+var formatCodePoints = function (value) {
+    var codePoints = Array.from(value).map(function (char) {
+        var code = char.codePointAt(0);
+        if (!code) {
+            return '';
+        }
+        return "U+".concat(code.toString(16).toUpperCase());
+    });
+    return codePoints.filter(Boolean).join(' ');
+};
+var renderSegmentTape = function (container, segments, labelPrefix, unitLabel) {
+    clearChildren(container);
+    segments.forEach(function (segment) {
+        var row = document.createElement('div');
+        row.className = 'segment-row';
+        var bar = document.createElement('div');
+        bar.className = 'segment-bar';
+        bar.setAttribute('role', 'meter');
+        bar.setAttribute('aria-label', "".concat(labelPrefix, " segment ").concat(segment.index + 1, " fill"));
+        bar.setAttribute('aria-valuemin', '0');
+        bar.setAttribute('aria-valuemax', String(segment.capacity));
+        var cappedValue = Math.min(segment.used, segment.capacity);
+        bar.setAttribute('aria-valuenow', String(cappedValue));
+        if (segment.used > segment.capacity) {
+            bar.setAttribute('aria-valuetext', "".concat(segment.used, " of ").concat(segment.capacity, " (over by ").concat(segment.used - segment.capacity, ")"));
+        }
+        var fill = document.createElement('div');
+        fill.className = 'segment-fill';
+        var ratio = segment.capacity > 0 ? segment.used / segment.capacity : 0;
+        if (ratio >= 1) {
+            fill.classList.add('full');
+        }
+        else if (ratio >= 0.8) {
+            fill.classList.add('near-full');
+        }
+        var width = segment.capacity > 0 ? Math.min(1, segment.used / segment.capacity) * 100 : 0;
+        fill.style.width = "".concat(width, "%");
+        bar.appendChild(fill);
+        row.appendChild(bar);
+        var meta = document.createElement('div');
+        meta.className = 'segment-meta';
+        var label = document.createElement('span');
+        label.textContent = "Segment ".concat(segment.index + 1);
+        var count = document.createElement('span');
+        count.textContent = "".concat(segment.used, " / ").concat(segment.capacity, " ").concat(unitLabel);
+        meta.appendChild(label);
+        meta.appendChild(count);
+        row.appendChild(meta);
+        container.appendChild(row);
+    });
+};
+var updateNonGsmTable = function (targets, nonGsmCharacters) {
+    var uniqueCharacters = Array.from(new Set(nonGsmCharacters));
+    clearChildren(targets.nonGsmTableBody);
+    if (uniqueCharacters.length === 0) {
+        targets.nonGsmTable.hidden = true;
+        targets.nonGsmEmpty.textContent = 'None detected';
+        targets.nonGsmEmpty.removeAttribute('hidden');
+        return;
+    }
+    targets.nonGsmEmpty.setAttribute('hidden', 'true');
+    targets.nonGsmTable.hidden = false;
+    uniqueCharacters.forEach(function (character) {
+        var row = document.createElement('tr');
+        var characterCell = document.createElement('td');
+        characterCell.textContent = character;
+        var codeCell = document.createElement('td');
+        codeCell.textContent = formatCodePoints(character);
+        row.appendChild(characterCell);
+        row.appendChild(codeCell);
+        targets.nonGsmTableBody.appendChild(row);
+    });
+};
+var renderSms = function (analysis, targets, errorMessage) {
+    targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
+    targets.encodingValue.textContent = analysis.encodingLabel;
+    targets.characters.textContent = analysis.characters.toString();
+    targets.segments.textContent = analysis.segmentsCount.toString();
+    targets.segments.classList.toggle('is-multi', analysis.segmentsCount > 1);
+    targets.remaining.textContent = analysis.remaining.toString();
+    targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
+    renderSegmentTape(targets.segmentTape, analysis.segments, 'SMS', 'chars');
+    targets.messageSize.textContent = "".concat(analysis.messageSize, " bits");
+    targets.totalSize.textContent = "".concat(analysis.totalSize, " bits");
+    targets.unicodeScalars.textContent = analysis.unicodeScalars.toString();
+    if (analysis.encoding === 'gsm7') {
+        targets.encodingSummary.textContent =
+            'All characters are GSM-7 compatible. Extended GSM-7 characters count as two units.';
+    }
+    else {
+        var unique = Array.from(new Set(analysis.nonGsmCharacters));
+        if (unique.length > 0) {
+            targets.encodingSummary.textContent = "Unicode detected because of: ".concat(unique.join(' '));
+        }
+        else {
+            targets.encodingSummary.textContent = 'Unicode encoding is required for this message.';
+        }
+    }
+    updateNonGsmTable(targets, analysis.nonGsmCharacters);
+    if (analysis.warnings.length > 0) {
+        targets.warnings.textContent = analysis.warnings.join(' ');
+        targets.warnings.removeAttribute('hidden');
+    }
+    else {
+        targets.warnings.textContent = '';
+        targets.warnings.setAttribute('hidden', 'true');
+    }
+    if (errorMessage) {
+        targets.error.textContent = errorMessage;
+        targets.error.removeAttribute('hidden');
+    }
+    else {
+        targets.error.textContent = '';
+        targets.error.setAttribute('hidden', 'true');
+    }
+};
+exports.renderSms = renderSms;
+var renderRcs = function (analysis, targets) {
+    targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
+    targets.encodingValue.textContent = analysis.encodingLabel;
+    targets.characters.textContent = analysis.characters.toString();
+    targets.segments.textContent = analysis.segmentsCount.toString();
+    targets.segments.classList.toggle('is-multi', analysis.segmentsCount > 1);
+    targets.messageType.textContent = analysis.messageType;
+    targets.remaining.textContent = analysis.remaining.toString();
+    targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
+    targets.size.textContent = "".concat(analysis.messageSize, " bits");
+    renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
+    if (analysis.region === 'us') {
+        targets.detailsText.textContent =
+            'US destinations are billed per 160 UTF-8 byte Rich segment.';
+        targets.detailBilling.textContent = "".concat(analysis.segmentsCount, " Rich segment").concat(analysis.segmentsCount === 1 ? '' : 's');
+    }
+    else {
+        targets.detailsText.textContent =
+            'International destinations are billed as a single Basic (≤160) or Single (>160) message.';
+        targets.detailBilling.textContent = "".concat(analysis.messageType, " message");
+    }
+    targets.detailSize.textContent = "".concat(analysis.messageSize, " bits");
+    targets.detailBytes.textContent = "".concat(analysis.characters, " bytes");
+};
+exports.renderRcs = renderRcs;
+//# sourceMappingURL=renderer.js.map
