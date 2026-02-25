@@ -85,9 +85,33 @@ Arguments:
 * `message`: Body of the RCS message
 * `region`: `us` or `international` (default: `us`)
 
+##### `encodingName`
+
+Always returns `"UTF-8"`.
+
+##### `numberOfBytes`
+
+Number of UTF-8 bytes in the message body.
+
+##### `messageSize`
+
+Total size of the message body in bits.
+
+##### `segmentsCount`
+
+Number of RCS segment(s) the message is split into for billing.
+
+##### `segments`
+
+An array with one entry per segment. Each entry contains `index`, `capacity`, and `used` (bytes).
+
 ##### `messageType`
 
 Returns `Rich`, `Basic`, or `Single` based on the region and UTF-8 length.
+
+##### `region`
+
+The region used for calculation: `"us"` or `"international"`.
 
 ## Try the library
 
