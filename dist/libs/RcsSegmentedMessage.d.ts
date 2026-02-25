@@ -1,12 +1,12 @@
 export type RcsRegion = 'us' | 'international';
-export type RcsMessageType = 'Rich' | 'Basic' | 'Single';
-export interface RcsSegment {
+type RcsMessageType = 'Rich' | 'Basic' | 'Single';
+interface RcsSegment {
     index: number;
     capacity: number;
     used: number;
 }
 export declare class RcsSegmentedMessage {
-    encodingName: 'UTF-8';
+    encodingName: "UTF-8";
     message: string;
     region: RcsRegion;
     numberOfCharacters: number;
@@ -17,3 +17,4 @@ export declare class RcsSegmentedMessage {
     messageType: RcsMessageType;
     constructor(message: string, region?: RcsRegion);
 }
+export {};

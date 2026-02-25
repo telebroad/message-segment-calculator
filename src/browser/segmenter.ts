@@ -23,15 +23,10 @@ const countSegmentUsed = (segment: SegmentElement[]): number => {
   }, 0);
 };
 
-export const analyzeSms = (
-  message: string,
-  encoding: SmsEncodingSetting,
-  smartEncoding: boolean,
-): SmsAnalysis => {
+export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartEncoding: boolean): SmsAnalysis => {
   const segmentedMessage = new SegmentedMessage(message, encoding, smartEncoding);
-  const encodingName = segmentedMessage.getEncodingName() as 'GSM-7' | 'UCS-2';
+  const { encodingName, segmentsCount } = segmentedMessage;
   const encodingKind = encodingName === 'GSM-7' ? 'gsm7' : 'unicode';
-  const segmentsCount = segmentedMessage.segmentsCount;
   const capacity = getSmsCapacity(encodingName, segmentsCount);
   const segments: SegmentData[] = segmentedMessage.segments.map((segment, index) => ({
     index,

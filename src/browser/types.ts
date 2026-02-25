@@ -1,6 +1,6 @@
 import type { RcsRegion } from '../libs/RcsSegmentedMessage';
 
-export type EncodingKind = 'gsm7' | 'unicode' | 'rcs';
+type EncodingKind = 'gsm7' | 'unicode' | 'rcs';
 
 export type SmsEncodingSetting = 'auto' | 'GSM-7' | 'UCS-2';
 

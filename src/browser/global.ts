@@ -1,6 +1,6 @@
-import { SegmentedMessage, RcsSegmentedMessage } from '../index';
+import { SegmentedMessage, RcsSegmentedMessage } from '..';
 
-const root = (typeof window !== 'undefined' ? window : globalThis) as Record<string, unknown>;
+const root = globalThis as Record<string, unknown>;
 
 root.SegmentedMessage = SegmentedMessage;
 root.RcsSegmentedMessage = RcsSegmentedMessage;

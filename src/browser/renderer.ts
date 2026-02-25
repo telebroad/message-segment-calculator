@@ -111,10 +111,7 @@ const renderSegmentTape = (
   });
 };
 
-const updateNonGsmTable = (
-  targets: SmsRenderTargets,
-  nonGsmCharacters: string[],
-): void => {
+const updateNonGsmTable = (targets: SmsRenderTargets, nonGsmCharacters: string[]): void => {
   const uniqueCharacters = Array.from(new Set(nonGsmCharacters));
   clearChildren(targets.nonGsmTableBody);
 
@@ -143,11 +140,7 @@ const updateNonGsmTable = (
   });
 };
 
-export const renderSms = (
-  analysis: SmsAnalysis,
-  targets: SmsRenderTargets,
-  errorMessage?: string,
-): void => {
+export const renderSms = (analysis: SmsAnalysis, targets: SmsRenderTargets, errorMessage?: string): void => {
   targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
   targets.encodingValue.textContent = analysis.encodingLabel;
   targets.characters.textContent = analysis.characters.toString();
@@ -207,11 +200,9 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
   renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
 
   if (analysis.region === 'us') {
-    targets.detailsText.textContent =
-      'US destinations are billed per 160 UTF-8 byte Rich segment.';
-    targets.detailBilling.textContent = `${analysis.segmentsCount} Rich segment${
-      analysis.segmentsCount === 1 ? '' : 's'
-    }`;
+    targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
+    const suffix = analysis.segmentsCount === 1 ? '' : 's';
+    targets.detailBilling.textContent = `${analysis.segmentsCount} Rich segment${suffix}`;
   } else {
     targets.detailsText.textContent =
       'International destinations are billed as a single Basic (≤160) or Single (>160) message.';

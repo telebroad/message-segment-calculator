@@ -1,16 +1,16 @@
 import { countUtf8Bytes } from './textUtils';
 
 export type RcsRegion = 'us' | 'international';
-export type RcsMessageType = 'Rich' | 'Basic' | 'Single';
+type RcsMessageType = 'Rich' | 'Basic' | 'Single';
 
-export interface RcsSegment {
+interface RcsSegment {
   index: number;
   capacity: number;
   used: number;
 }
 
 export class RcsSegmentedMessage {
-  encodingName: 'UTF-8' = 'UTF-8';
+  encodingName = 'UTF-8' as const;
 
   message: string;
 

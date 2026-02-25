@@ -1,8 +1,7 @@
 import { analyzeRcs, analyzeSms } from './segmenter';
-import { renderRcs, renderSms } from './renderer';
+import { renderRcs, renderSms, SmsRenderTargets, RcsRenderTargets } from './renderer';
 import type { RcsRegion } from '../libs/RcsSegmentedMessage';
 import type { SmsEncodingSetting } from './types';
-import type { SmsRenderTargets, RcsRenderTargets } from './renderer';
 
 const getElement = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);

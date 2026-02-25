@@ -135,9 +135,9 @@ var renderRcs = function (analysis, targets) {
     targets.size.textContent = "".concat(analysis.messageSize, " bits");
     renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
     if (analysis.region === 'us') {
-        targets.detailsText.textContent =
-            'US destinations are billed per 160 UTF-8 byte Rich segment.';
-        targets.detailBilling.textContent = "".concat(analysis.segmentsCount, " Rich segment").concat(analysis.segmentsCount === 1 ? '' : 's');
+        targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
+        var suffix = analysis.segmentsCount === 1 ? '' : 's';
+        targets.detailBilling.textContent = "".concat(analysis.segmentsCount, " Rich segment").concat(suffix);
     }
     else {
         targets.detailsText.textContent =

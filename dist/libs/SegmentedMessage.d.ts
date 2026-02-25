@@ -24,8 +24,7 @@ export declare class SegmentedMessage {
      * @param {boolean} [encoding] Optional: encoding. It can be 'GSM-7', 'UCS-2', 'auto'. Default value: 'auto'
      * @param {boolean} smartEncoding Optional: whether or not Twilio's [Smart Encoding](https://www.twilio.com/docs/messaging/services#smart-encoding) is emulated. Default value: false
      * @property {number} numberOfUnicodeScalars  Number of Unicode Scalars (i.e. unicode pairs) the message is made of
-     *
-    */
+     */
     constructor(message: string, encoding?: SmsEncoding | 'auto', smartEncoding?: boolean);
     /**
      * Internal method to check if the message has any non-GSM7 characters

@@ -19,9 +19,8 @@ var countSegmentUsed = function (segment) {
 };
 var analyzeSms = function (message, encoding, smartEncoding) {
     var segmentedMessage = new SegmentedMessage_1.SegmentedMessage(message, encoding, smartEncoding);
-    var encodingName = segmentedMessage.getEncodingName();
+    var encodingName = segmentedMessage.encodingName, segmentsCount = segmentedMessage.segmentsCount;
     var encodingKind = encodingName === 'GSM-7' ? 'gsm7' : 'unicode';
-    var segmentsCount = segmentedMessage.segmentsCount;
     var capacity = getSmsCapacity(encodingName, segmentsCount);
     var segments = segmentedMessage.segments.map(function (segment, index) { return ({
         index: index,
