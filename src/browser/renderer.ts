@@ -31,6 +31,8 @@ export interface RcsRenderTargets {
   detailSize: HTMLElement;
   detailBytes: HTMLElement;
   detailBilling: HTMLElement;
+  charCount: HTMLElement;
+  warning: HTMLElement;
 }
 
 const clearChildren = (element: HTMLElement): void => {
@@ -211,4 +213,15 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
 
   targets.detailSize.textContent = `${analysis.messageSize} bits`;
   targets.detailBytes.textContent = `${analysis.characters} bytes`;
+  targets.charCount.textContent = `${analysis.unicodeLength} / 1,600`;
+
+  const RCS_CHAR_LIMIT = 1600;
+  if (analysis.unicodeLength > RCS_CHAR_LIMIT) {
+    const over = (analysis.unicodeLength - RCS_CHAR_LIMIT).toLocaleString();
+    targets.warning.textContent = `Message exceeds the ${RCS_CHAR_LIMIT.toLocaleString()}-character API limit by ${over} characters. It will be rejected by the Twilio API.`;
+    targets.warning.removeAttribute('hidden');
+  } else {
+    targets.warning.textContent = '';
+    targets.warning.setAttribute('hidden', 'true');
+  }
 };

@@ -52,6 +52,8 @@ const init = (): void => {
     detailSize: getElement('rcs-size-detail'),
     detailBytes: getElement('rcs-bytes-detail'),
     detailBilling: getElement('rcs-billing-detail'),
+    charCount: getElement('rcs-char-count'),
+    warning: getElement('rcs-warning'),
   };
 
   const updateAll = (): void => {

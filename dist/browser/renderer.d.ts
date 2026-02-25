@@ -29,6 +29,8 @@ export interface RcsRenderTargets {
     detailSize: HTMLElement;
     detailBytes: HTMLElement;
     detailBilling: HTMLElement;
+    charCount: HTMLElement;
+    warning: HTMLElement;
 }
 export declare const renderSms: (analysis: SmsAnalysis, targets: SmsRenderTargets, errorMessage?: string) => void;
 export declare const renderRcs: (analysis: RcsAnalysis, targets: RcsRenderTargets) => void;

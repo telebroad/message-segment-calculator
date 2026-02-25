@@ -146,6 +146,17 @@ var renderRcs = function (analysis, targets) {
     }
     targets.detailSize.textContent = "".concat(analysis.messageSize, " bits");
     targets.detailBytes.textContent = "".concat(analysis.characters, " bytes");
+    targets.charCount.textContent = "".concat(analysis.unicodeLength, " / 1,600");
+    var RCS_CHAR_LIMIT = 1600;
+    if (analysis.unicodeLength > RCS_CHAR_LIMIT) {
+        var over = (analysis.unicodeLength - RCS_CHAR_LIMIT).toLocaleString();
+        targets.warning.textContent = "Message exceeds the ".concat(RCS_CHAR_LIMIT.toLocaleString(), "-character API limit by ").concat(over, " characters. It will be rejected by the Twilio API.");
+        targets.warning.removeAttribute('hidden');
+    }
+    else {
+        targets.warning.textContent = '';
+        targets.warning.setAttribute('hidden', 'true');
+    }
 };
 exports.renderRcs = renderRcs;
 //# sourceMappingURL=renderer.js.map

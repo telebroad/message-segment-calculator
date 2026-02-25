@@ -26,6 +26,7 @@ export interface RcsAnalysis {
     segments: SegmentData[];
     segmentsCount: number;
     characters: number;
+    unicodeLength: number;
     remaining: number;
     messageSize: number;
     messageType: string;

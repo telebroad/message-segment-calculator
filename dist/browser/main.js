@@ -47,6 +47,8 @@ var init = function () {
         detailSize: getElement('rcs-size-detail'),
         detailBytes: getElement('rcs-bytes-detail'),
         detailBilling: getElement('rcs-billing-detail'),
+        charCount: getElement('rcs-char-count'),
+        warning: getElement('rcs-warning'),
     };
     var updateAll = function () {
         var message = messageInput.value;
