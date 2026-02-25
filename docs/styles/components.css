@@ -397,3 +397,84 @@ h2 {
   flex-direction: column;
   gap: var(--space-3);
 }
+
+.calculator-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.calculator-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.calculator-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.calculator-toggle h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.calculator-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.toggle-indicator {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.toggle-indicator::before,
+.toggle-indicator::after {
+  content: '';
+  position: absolute;
+  background: var(--color-text-secondary);
+  border-radius: 1px;
+  transition: transform 0.2s ease;
+}
+
+.toggle-indicator::before {
+  top: 50%;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.toggle-indicator::after {
+  left: 50%;
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.calculator-section[open] > .calculator-toggle .toggle-indicator::after {
+  transform: translateX(-50%) rotate(90deg);
+  opacity: 0;
+}
+
+.calculator-toggle:hover .toggle-indicator::before,
+.calculator-toggle:hover .toggle-indicator::after {
+  background: var(--color-text-primary);
+}
+
+.calculator-body {
+  padding: 0 var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

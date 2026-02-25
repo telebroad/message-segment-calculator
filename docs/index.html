@@ -63,11 +63,13 @@
         </div>
       </section>
 
-      <section class="calculator" id="sms-calculator">
-        <div class="calculator-header">
+      <details class="calculator-section" id="sms-calculator" open>
+        <summary class="calculator-toggle">
           <h2>SMS</h2>
-          <p>Segmented with GSM-7 or UCS-2, including Smart Encoding support.</p>
-        </div>
+          <span class="calculator-desc">GSM-7 / UCS-2 with Smart Encoding</span>
+          <span class="toggle-indicator" aria-hidden="true"></span>
+        </summary>
+        <div class="calculator-body">
         <div class="stats-bar" id="sms-stats" aria-live="polite">
           <div class="stat-chip encoding-badge" id="sms-encoding-badge" data-encoding="gsm7">
             <span class="stat-label">Encoding</span>
@@ -89,7 +91,7 @@
 
         <div class="segment-tape-container" id="sms-segment-tape"></div>
 
-        <details class="encoding-details" id="sms-details">
+        <details class="encoding-details" id="sms-details" open>
           <summary>Encoding details</summary>
           <div class="details-body">
             <p id="sms-encoding-explainer"></p>
@@ -124,13 +126,16 @@
             <div class="detail-warning" id="sms-error" hidden></div>
           </div>
         </details>
-      </section>
-
-      <section class="calculator" id="rcs-calculator">
-        <div class="calculator-header">
-          <h2>RCS</h2>
-          <p>UTF-8 only. US destinations bill per 160-byte Rich segment.</p>
         </div>
+      </details>
+
+      <details class="calculator-section" id="rcs-calculator" open>
+        <summary class="calculator-toggle">
+          <h2>RCS</h2>
+          <span class="calculator-desc">UTF-8 with region-based billing</span>
+          <span class="toggle-indicator" aria-hidden="true"></span>
+        </summary>
+        <div class="calculator-body">
         <div class="panel control-panel">
           <div class="control-group">
             <span class="control-label">Recipient region</span>
@@ -175,7 +180,7 @@
 
         <div class="segment-tape-container" id="rcs-segment-tape"></div>
 
-        <details class="encoding-details" id="rcs-details">
+        <details class="encoding-details" id="rcs-details" open>
           <summary>RCS details</summary>
           <div class="details-body">
             <p id="rcs-encoding-explainer"></p>
@@ -195,7 +200,8 @@
             </div>
           </div>
         </details>
-      </section>
+        </div>
+      </details>
     </main>
 
     <footer class="page-footer"></footer>
