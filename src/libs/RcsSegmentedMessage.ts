@@ -9,6 +9,8 @@ interface RcsSegment {
   used: number;
 }
 
+const RCS_SEGMENT_CAPACITY_BYTES = 160;
+
 export class RcsSegmentedMessage {
   encodingName = 'UTF-8' as const;
 
@@ -16,7 +18,7 @@ export class RcsSegmentedMessage {
 
   region: RcsRegion;
 
-  numberOfCharacters: number;
+  numberOfBytes: number;
 
   messageSize: number;
 
@@ -33,28 +35,32 @@ export class RcsSegmentedMessage {
     this.region = region;
 
     const utf8Bytes = countUtf8Bytes(message);
-    this.numberOfCharacters = utf8Bytes;
+    this.numberOfBytes = utf8Bytes;
     this.messageSize = utf8Bytes * 8;
     this.totalSize = this.messageSize;
 
-    const capacity = 160;
+    if (utf8Bytes === 0) {
+      this.segmentsCount = 0;
+      this.messageType = region === 'us' ? 'Rich' : 'Basic';
+      this.segments = [];
+      return;
+    }
 
     if (region === 'us') {
-      const rawSegmentsCount = Math.ceil(utf8Bytes / capacity);
-      this.segmentsCount = Math.max(1, rawSegmentsCount);
+      this.segmentsCount = Math.ceil(utf8Bytes / RCS_SEGMENT_CAPACITY_BYTES);
       this.messageType = 'Rich';
 
       this.segments = [];
       let remaining = utf8Bytes;
       for (let index = 0; index < this.segmentsCount; index += 1) {
-        const used = Math.min(capacity, remaining);
-        this.segments.push({ index, capacity, used });
+        const used = Math.min(RCS_SEGMENT_CAPACITY_BYTES, remaining);
+        this.segments.push({ index, capacity: RCS_SEGMENT_CAPACITY_BYTES, used });
         remaining -= used;
       }
     } else {
       this.segmentsCount = 1;
-      this.messageType = utf8Bytes <= capacity ? 'Basic' : 'Single';
-      this.segments = [{ index: 0, capacity, used: utf8Bytes }];
+      this.messageType = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES ? 'Basic' : 'Single';
+      this.segments = [{ index: 0, capacity: RCS_SEGMENT_CAPACITY_BYTES, used: utf8Bytes }];
     }
   }
 }

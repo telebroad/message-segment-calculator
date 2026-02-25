@@ -9,10 +9,10 @@ var clearChildren = function (element) {
 var formatCodePoints = function (value) {
     var codePoints = Array.from(value).map(function (char) {
         var code = char.codePointAt(0);
-        if (!code) {
+        if (code === undefined) {
             return '';
         }
-        return "U+".concat(code.toString(16).toUpperCase());
+        return "U+".concat(code.toString(16).toUpperCase().padStart(4, '0'));
     });
     return codePoints.filter(Boolean).join(' ');
 };

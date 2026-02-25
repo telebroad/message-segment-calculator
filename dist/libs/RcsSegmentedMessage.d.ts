@@ -9,7 +9,7 @@ export declare class RcsSegmentedMessage {
     encodingName: "UTF-8";
     message: string;
     region: RcsRegion;
-    numberOfCharacters: number;
+    numberOfBytes: number;
     messageSize: number;
     totalSize: number;
     segmentsCount: number;

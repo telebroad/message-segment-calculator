@@ -42,10 +42,10 @@ const clearChildren = (element: HTMLElement): void => {
 const formatCodePoints = (value: string): string => {
   const codePoints = Array.from(value).map((char) => {
     const code = char.codePointAt(0);
-    if (!code) {
+    if (code === undefined) {
       return '';
     }
-    return `U+${code.toString(16).toUpperCase()}`;
+    return `U+${code.toString(16).toUpperCase().padStart(4, '0')}`;
   });
   return codePoints.filter(Boolean).join(' ');
 };

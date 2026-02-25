@@ -67,7 +67,7 @@ export const analyzeRcs = (message: string, region: RcsRegion): RcsAnalysis => {
     region,
     segments,
     segmentsCount: rcsMessage.segmentsCount,
-    characters: rcsMessage.numberOfCharacters,
+    characters: rcsMessage.numberOfBytes,
     remaining,
     messageSize: rcsMessage.messageSize,
     messageType: rcsMessage.messageType,

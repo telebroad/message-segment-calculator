@@ -59,7 +59,7 @@ var analyzeRcs = function (message, region) {
         region: region,
         segments: segments,
         segmentsCount: rcsMessage.segmentsCount,
-        characters: rcsMessage.numberOfCharacters,
+        characters: rcsMessage.numberOfBytes,
         remaining: remaining,
         messageSize: rcsMessage.messageSize,
         messageType: rcsMessage.messageType,
