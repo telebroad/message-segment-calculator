@@ -133,7 +133,13 @@ var renderRcs = function (analysis, targets) {
     targets.remaining.textContent = analysis.remaining.toString();
     targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
     targets.size.textContent = "".concat(analysis.messageSize, " bits");
-    renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
+    if (analysis.region === 'us') {
+        targets.segmentTape.style.display = '';
+        renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
+    }
+    else {
+        targets.segmentTape.style.display = 'none';
+    }
     if (analysis.region === 'us') {
         targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
         var suffix = analysis.segmentsCount === 1 ? '' : 's';

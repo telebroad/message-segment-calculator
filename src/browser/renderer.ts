@@ -199,7 +199,12 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
   targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
   targets.size.textContent = `${analysis.messageSize} bits`;
 
-  renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
+  if (analysis.region === 'us') {
+    targets.segmentTape.style.display = '';
+    renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
+  } else {
+    targets.segmentTape.style.display = 'none';
+  }
 
   if (analysis.region === 'us') {
     targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
