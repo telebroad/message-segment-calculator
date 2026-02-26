@@ -1,6 +1,32 @@
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderRcs = exports.renderSms = void 0;
+var API_CHAR_LIMIT = 1600;
 var clearChildren = function (element) {
     while (element.firstChild) {
         element.removeChild(element.firstChild);
@@ -105,8 +131,13 @@ var renderSms = function (analysis, targets, errorMessage) {
         }
     }
     updateNonGsmTable(targets, analysis.nonGsmCharacters);
-    if (analysis.warnings.length > 0) {
-        targets.warnings.textContent = analysis.warnings.join(' ');
+    var allWarnings = __spreadArray([], __read(analysis.warnings), false);
+    if (analysis.unicodeScalars > API_CHAR_LIMIT) {
+        var over = (analysis.unicodeScalars - API_CHAR_LIMIT).toLocaleString();
+        allWarnings.push("Message exceeds the ".concat(API_CHAR_LIMIT.toLocaleString(), "-character API limit by ").concat(over, " characters. It will be rejected by the Twilio API."));
+    }
+    if (allWarnings.length > 0) {
+        targets.warnings.textContent = allWarnings.join(' ');
         targets.warnings.removeAttribute('hidden');
     }
     else {
@@ -152,11 +183,10 @@ var renderRcs = function (analysis, targets) {
     }
     targets.detailSize.textContent = "".concat(analysis.messageSize, " bits");
     targets.detailBytes.textContent = "".concat(analysis.characters, " bytes");
-    targets.charCount.textContent = "".concat(analysis.unicodeLength, " / 1,600");
-    var RCS_CHAR_LIMIT = 1600;
-    if (analysis.unicodeLength > RCS_CHAR_LIMIT) {
-        var over = (analysis.unicodeLength - RCS_CHAR_LIMIT).toLocaleString();
-        targets.warning.textContent = "Message exceeds the ".concat(RCS_CHAR_LIMIT.toLocaleString(), "-character API limit by ").concat(over, " characters. It will be rejected by the Twilio API.");
+    targets.charCount.textContent = "".concat(analysis.unicodeLength, " / ").concat(API_CHAR_LIMIT.toLocaleString());
+    if (analysis.unicodeLength > API_CHAR_LIMIT) {
+        var over = (analysis.unicodeLength - API_CHAR_LIMIT).toLocaleString();
+        targets.warning.textContent = "Message exceeds the ".concat(API_CHAR_LIMIT.toLocaleString(), "-character API limit by ").concat(over, " characters. It will be rejected by the Twilio API.");
         targets.warning.removeAttribute('hidden');
     }
     else {

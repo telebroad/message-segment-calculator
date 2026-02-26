@@ -1,5 +1,7 @@
 import type { SegmentData, SmsAnalysis, RcsAnalysis } from './types';
 
+const API_CHAR_LIMIT = 1600;
+
 export interface SmsRenderTargets {
   encodingBadge: HTMLElement;
   encodingValue: HTMLElement;
@@ -171,8 +173,16 @@ export const renderSms = (analysis: SmsAnalysis, targets: SmsRenderTargets, erro
 
   updateNonGsmTable(targets, analysis.nonGsmCharacters);
 
-  if (analysis.warnings.length > 0) {
-    targets.warnings.textContent = analysis.warnings.join(' ');
+  const allWarnings = [...analysis.warnings];
+  if (analysis.unicodeScalars > API_CHAR_LIMIT) {
+    const over = (analysis.unicodeScalars - API_CHAR_LIMIT).toLocaleString();
+    allWarnings.push(
+      `Message exceeds the ${API_CHAR_LIMIT.toLocaleString()}-character API limit by ${over} characters. It will be rejected by the Twilio API.`,
+    );
+  }
+
+  if (allWarnings.length > 0) {
+    targets.warnings.textContent = allWarnings.join(' ');
     targets.warnings.removeAttribute('hidden');
   } else {
     targets.warnings.textContent = '';
@@ -218,12 +228,11 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
 
   targets.detailSize.textContent = `${analysis.messageSize} bits`;
   targets.detailBytes.textContent = `${analysis.characters} bytes`;
-  targets.charCount.textContent = `${analysis.unicodeLength} / 1,600`;
+  targets.charCount.textContent = `${analysis.unicodeLength} / ${API_CHAR_LIMIT.toLocaleString()}`;
 
-  const RCS_CHAR_LIMIT = 1600;
-  if (analysis.unicodeLength > RCS_CHAR_LIMIT) {
-    const over = (analysis.unicodeLength - RCS_CHAR_LIMIT).toLocaleString();
-    targets.warning.textContent = `Message exceeds the ${RCS_CHAR_LIMIT.toLocaleString()}-character API limit by ${over} characters. It will be rejected by the Twilio API.`;
+  if (analysis.unicodeLength > API_CHAR_LIMIT) {
+    const over = (analysis.unicodeLength - API_CHAR_LIMIT).toLocaleString();
+    targets.warning.textContent = `Message exceeds the ${API_CHAR_LIMIT.toLocaleString()}-character API limit by ${over} characters. It will be rejected by the Twilio API.`;
     targets.warning.removeAttribute('hidden');
   } else {
     targets.warning.textContent = '';
