@@ -80,6 +80,8 @@ describe('RCS International billing', () => {
 
     expect(rcsMessage.segmentsCount).toBe(1);
     expect(rcsMessage.messageType).toBe('Basic');
+    expect(rcsMessage.segments[0].capacity).toBe(160);
+    expect(rcsMessage.segments[0].used).toBe(160);
   });
 
   test('161 UTF-8 bytes is Single', () => {
@@ -88,6 +90,9 @@ describe('RCS International billing', () => {
 
     expect(rcsMessage.segmentsCount).toBe(1);
     expect(rcsMessage.messageType).toBe('Single');
+    // International capacity matches usage (no segmentation concept)
+    expect(rcsMessage.segments[0].capacity).toBe(161);
+    expect(rcsMessage.segments[0].used).toBe(161);
   });
 
   test('International never segments regardless of length', () => {
@@ -97,6 +102,7 @@ describe('RCS International billing', () => {
     expect(rcsMessage.segmentsCount).toBe(1);
     expect(rcsMessage.messageType).toBe('Single');
     expect(rcsMessage.segments).toHaveLength(1);
+    expect(rcsMessage.segments[0].capacity).toBe(1000);
   });
 });
 
