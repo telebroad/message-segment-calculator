@@ -151,3 +151,166 @@ describe('RCS UTF-8 byte counting', () => {
     expect(rcsMessage.messageType).toBe('Rich');
   });
 });
+
+describe('RCS International capacity equals usage', () => {
+  test('Basic message capacity matches byte count', () => {
+    const rcsMessage = new RcsSegmentedMessage('Hello', 'international');
+    expect(rcsMessage.segments[0].capacity).toBe(5);
+    expect(rcsMessage.segments[0].used).toBe(5);
+  });
+
+  test('Single message capacity matches byte count', () => {
+    const message = 'a'.repeat(500);
+    const rcsMessage = new RcsSegmentedMessage(message, 'international');
+    expect(rcsMessage.segments[0].capacity).toBe(500);
+    expect(rcsMessage.segments[0].used).toBe(500);
+  });
+
+  test('International with multi-byte characters capacity matches byte count', () => {
+    // 100 CJK chars × 3 bytes = 300 bytes (Single)
+    const message = '中'.repeat(100);
+    const rcsMessage = new RcsSegmentedMessage(message, 'international');
+    expect(rcsMessage.numberOfBytes).toBe(300);
+    expect(rcsMessage.messageType).toBe('Single');
+    expect(rcsMessage.segments[0].capacity).toBe(300);
+    expect(rcsMessage.segments[0].used).toBe(300);
+  });
+
+  test('International Basic threshold with multi-byte at boundary', () => {
+    // 53 CJK chars × 3 bytes = 159 bytes (Basic, under 160)
+    const message = '中'.repeat(53);
+    const rcsMessage = new RcsSegmentedMessage(message, 'international');
+    expect(rcsMessage.numberOfBytes).toBe(159);
+    expect(rcsMessage.messageType).toBe('Basic');
+  });
+
+  test('International Single threshold with multi-byte at boundary', () => {
+    // 54 CJK chars × 3 bytes = 162 bytes (Single, over 160)
+    const message = '中'.repeat(54);
+    const rcsMessage = new RcsSegmentedMessage(message, 'international');
+    expect(rcsMessage.numberOfBytes).toBe(162);
+    expect(rcsMessage.messageType).toBe('Single');
+  });
+});
+
+describe('RCS US segment capacity is always 160', () => {
+  test('single segment has capacity 160', () => {
+    const rcsMessage = new RcsSegmentedMessage('Hello', 'us');
+    expect(rcsMessage.segments[0].capacity).toBe(160);
+  });
+
+  test('all segments have capacity 160', () => {
+    const message = 'a'.repeat(500);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    expect(rcsMessage.segmentsCount).toBe(4);
+    rcsMessage.segments.forEach((segment) => {
+      expect(segment.capacity).toBe(160);
+    });
+  });
+
+  test('last segment used is correct remainder', () => {
+    const message = 'a'.repeat(500);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    // 500 / 160 = 3 full + 20 remainder
+    expect(rcsMessage.segments[3].used).toBe(20);
+  });
+});
+
+describe('RCS totalSize and messageSize', () => {
+  test('messageSize is bytes * 8', () => {
+    const rcsMessage = new RcsSegmentedMessage('Hello', 'us');
+    expect(rcsMessage.messageSize).toBe(5 * 8);
+  });
+
+  test('totalSize equals messageSize', () => {
+    const rcsMessage = new RcsSegmentedMessage('Hello World!', 'us');
+    expect(rcsMessage.totalSize).toBe(rcsMessage.messageSize);
+  });
+
+  test('empty message has zero size', () => {
+    const rcsMessage = new RcsSegmentedMessage('', 'us');
+    expect(rcsMessage.messageSize).toBe(0);
+    expect(rcsMessage.totalSize).toBe(0);
+  });
+});
+
+describe('RCS encodingName', () => {
+  test('always returns UTF-8 for US', () => {
+    const rcsMessage = new RcsSegmentedMessage('test', 'us');
+    expect(rcsMessage.encodingName).toBe('UTF-8');
+  });
+
+  test('always returns UTF-8 for international', () => {
+    const rcsMessage = new RcsSegmentedMessage('test', 'international');
+    expect(rcsMessage.encodingName).toBe('UTF-8');
+  });
+
+  test('UTF-8 even for pure ASCII', () => {
+    const rcsMessage = new RcsSegmentedMessage('abc');
+    expect(rcsMessage.encodingName).toBe('UTF-8');
+  });
+
+  test('UTF-8 even for emoji', () => {
+    const rcsMessage = new RcsSegmentedMessage('😀');
+    expect(rcsMessage.encodingName).toBe('UTF-8');
+  });
+});
+
+describe('RCS edge cases', () => {
+  test('whitespace-only message counts bytes correctly', () => {
+    const rcsMessage = new RcsSegmentedMessage('   ', 'us');
+    expect(rcsMessage.numberOfBytes).toBe(3);
+    expect(rcsMessage.segmentsCount).toBe(1);
+  });
+
+  test('newlines count as 1 byte each', () => {
+    const rcsMessage = new RcsSegmentedMessage('\n\n\n', 'us');
+    expect(rcsMessage.numberOfBytes).toBe(3);
+  });
+
+  test('CRLF counts as 2 bytes', () => {
+    const rcsMessage = new RcsSegmentedMessage('\r\n', 'us');
+    expect(rcsMessage.numberOfBytes).toBe(2);
+  });
+
+  test('message stores original text', () => {
+    const text = 'Hello 世界 🌍';
+    const rcsMessage = new RcsSegmentedMessage(text, 'us');
+    expect(rcsMessage.message).toBe(text);
+  });
+
+  test('region is stored correctly', () => {
+    const us = new RcsSegmentedMessage('test', 'us');
+    const intl = new RcsSegmentedMessage('test', 'international');
+    expect(us.region).toBe('us');
+    expect(intl.region).toBe('international');
+  });
+
+  test('segment indices are sequential starting at 0', () => {
+    const message = 'a'.repeat(500);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    rcsMessage.segments.forEach((segment, i) => {
+      expect(segment.index).toBe(i);
+    });
+  });
+
+  test('all segment bytes sum to total bytes', () => {
+    const message = 'a'.repeat(500);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    const totalUsed = rcsMessage.segments.reduce((sum, s) => sum + s.used, 0);
+    expect(totalUsed).toBe(rcsMessage.numberOfBytes);
+  });
+
+  test('compound emoji (flag) byte count', () => {
+    // 🇺🇸 = U+1F1FA U+1F1F8 = 4 + 4 = 8 bytes
+    const rcsMessage = new RcsSegmentedMessage('🇺🇸', 'us');
+    expect(rcsMessage.numberOfBytes).toBe(8);
+  });
+
+  test('ZWJ emoji sequence byte count', () => {
+    // 👨‍👩‍👧 = multiple code points joined by ZWJ
+    const rcsMessage = new RcsSegmentedMessage('👨\u200D👩\u200D👧', 'us');
+    // 👨(4) + ZWJ(3) + 👩(4) + ZWJ(3) + 👧(4) = 18 bytes
+    expect(rcsMessage.numberOfBytes).toBe(18);
+  });
+});
