@@ -118,7 +118,7 @@ The region used for calculation: `"us"` or `"international"`.
 If you want to test the library you can use the script provided in `playground/index.js`. Install the dependencies (`npm install`) and then run: 
 
 ```shell
-$ node playground/index.js "👋 Hello World 🌍"
+node playground/index.js "👋 Hello World 🌍"
 ```
 
 ## Contributing
