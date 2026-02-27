@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RcsSegmentedMessage = void 0;
 var textUtils_1 = require("./textUtils");
 var RCS_SEGMENT_CAPACITY_BYTES = 160;
+var RCS_SINGLE_CAPACITY_BYTES = 1600;
 var VALID_REGIONS = ['us', 'international'];
 var RcsSegmentedMessage = /** @class */ (function () {
     function RcsSegmentedMessage(message, region) {
@@ -36,13 +37,15 @@ var RcsSegmentedMessage = /** @class */ (function () {
         }
         else {
             /*
-             * International: no segmentation. Capacity equals actual byte count so the
-             * UI tape never shows "over capacity." Billing is purely classification-based:
+             * International: no segmentation. Billing is classification-based:
              * Basic (≤160 bytes) or Single (>160 bytes).
+             * Capacity reflects the tier limit so the UI shows meaningful "remaining."
              */
             this.segmentsCount = 1;
-            this.messageType = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES ? 'Basic' : 'Single';
-            this.segments = [{ index: 0, capacity: utf8Bytes, used: utf8Bytes }];
+            var isBasic = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES;
+            this.messageType = isBasic ? 'Basic' : 'Single';
+            var capacity = isBasic ? RCS_SEGMENT_CAPACITY_BYTES : RCS_SINGLE_CAPACITY_BYTES;
+            this.segments = [{ index: 0, capacity: capacity, used: utf8Bytes }];
         }
     }
     return RcsSegmentedMessage;

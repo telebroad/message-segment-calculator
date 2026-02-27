@@ -90,8 +90,7 @@ describe('RCS International billing', () => {
 
     expect(rcsMessage.segmentsCount).toBe(1);
     expect(rcsMessage.messageType).toBe('Single');
-    // International capacity matches usage (no segmentation concept)
-    expect(rcsMessage.segments[0].capacity).toBe(161);
+    expect(rcsMessage.segments[0].capacity).toBe(1600);
     expect(rcsMessage.segments[0].used).toBe(161);
   });
 
@@ -102,7 +101,7 @@ describe('RCS International billing', () => {
     expect(rcsMessage.segmentsCount).toBe(1);
     expect(rcsMessage.messageType).toBe('Single');
     expect(rcsMessage.segments).toHaveLength(1);
-    expect(rcsMessage.segments[0].capacity).toBe(1000);
+    expect(rcsMessage.segments[0].capacity).toBe(1600);
   });
 });
 
@@ -158,27 +157,27 @@ describe('RCS UTF-8 byte counting', () => {
   });
 });
 
-describe('RCS International capacity equals usage', () => {
-  test('Basic message capacity matches byte count', () => {
+describe('RCS International capacity reflects tier limit', () => {
+  test('Basic message capacity is 160', () => {
     const rcsMessage = new RcsSegmentedMessage('Hello', 'international');
-    expect(rcsMessage.segments[0].capacity).toBe(5);
+    expect(rcsMessage.segments[0].capacity).toBe(160);
     expect(rcsMessage.segments[0].used).toBe(5);
   });
 
-  test('Single message capacity matches byte count', () => {
+  test('Single message capacity is 1600', () => {
     const message = 'a'.repeat(500);
     const rcsMessage = new RcsSegmentedMessage(message, 'international');
-    expect(rcsMessage.segments[0].capacity).toBe(500);
+    expect(rcsMessage.segments[0].capacity).toBe(1600);
     expect(rcsMessage.segments[0].used).toBe(500);
   });
 
-  test('International with multi-byte characters capacity matches byte count', () => {
+  test('International with multi-byte characters uses tier capacity', () => {
     // 100 CJK chars × 3 bytes = 300 bytes (Single)
     const message = '中'.repeat(100);
     const rcsMessage = new RcsSegmentedMessage(message, 'international');
     expect(rcsMessage.numberOfBytes).toBe(300);
     expect(rcsMessage.messageType).toBe('Single');
-    expect(rcsMessage.segments[0].capacity).toBe(300);
+    expect(rcsMessage.segments[0].capacity).toBe(1600);
     expect(rcsMessage.segments[0].used).toBe(300);
   });
 
