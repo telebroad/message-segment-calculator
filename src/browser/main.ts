@@ -1,7 +1,7 @@
 import { analyzeRcs, analyzeRcsRichContent, analyzeSms } from './segmenter';
 import { renderRcs, renderRcsError, renderSms, SmsRenderTargets, RcsRenderTargets } from './renderer';
 import type { RcsRegion } from '../libs/RcsSegmentedMessage';
-import type { RcsCardContent } from '../libs/RcsCardContent';
+import { normalizeRcsContent } from '../libs/RcsCardContent';
 import type { SmsEncodingSetting } from './types';
 
 const getElement = <T extends HTMLElement>(id: string): T => {
@@ -84,7 +84,8 @@ const init = (): void => {
         return;
       }
       try {
-        const content = JSON.parse(message) as RcsCardContent;
+        const raw = JSON.parse(message) as Record<string, unknown>;
+        const content = normalizeRcsContent(raw);
         const rcsAnalysis = analyzeRcsRichContent(content, rcsRegion || 'us');
         renderRcs(rcsAnalysis, rcsTargets);
       } catch (e) {

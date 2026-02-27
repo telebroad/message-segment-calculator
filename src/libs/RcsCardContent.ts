@@ -1,21 +1,21 @@
 export interface RcsCardAction {
-  type: 'quickreply' | 'url' | 'phone';
-  title?: string;
-  url?: string;
-  phone?: string;
-  webview_size?: 'NONE' | 'HALF' | 'TALL' | 'FULL';
+  type: string;
+  title?: string | null;
+  url?: string | null;
+  phone?: string | null;
+  webview_size?: string | null;
 }
 
 export interface RcsCardContent {
   content_type: string;
-  title?: string;
-  body?: string;
-  subtitle?: string;
-  media?: string | string[];
-  actions?: RcsCardAction[];
-  orientation?: string;
-  thumbnailImageAlignment?: string;
-  height?: string;
+  title?: string | null;
+  body?: string | null;
+  subtitle?: string | null;
+  media?: string | string[] | null;
+  actions?: RcsCardAction[] | null;
+  orientation?: string | null;
+  thumbnailImageAlignment?: string | null;
+  height?: string | null;
 }
 
 export type RcsContentClassification = 'Rich' | 'Rich media';
@@ -28,7 +28,8 @@ interface ClassificationResult {
   billableText: string;
 }
 
-const isPresent = (value: string | undefined): value is string => typeof value === 'string' && value.trim().length > 0;
+const isPresent = (value: string | null | undefined): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
 
 const hasMedia = (content: RcsCardContent): boolean => {
   if (!content.media) return false;
@@ -38,9 +39,41 @@ const hasMedia = (content: RcsCardContent): boolean => {
 
 const hasWebviewAction = (content: RcsCardContent): boolean => {
   if (!content.actions) return false;
-  return content.actions.some(
-    (action) => action.type === 'url' && isPresent(action.webview_size) && action.webview_size !== 'NONE',
-  );
+  return content.actions.some((action) => {
+    const type = action.type.toLowerCase();
+    const size = typeof action.webview_size === 'string' ? action.webview_size.toUpperCase() : '';
+    return type === 'url' && size !== '' && size !== 'NONE';
+  });
+};
+
+/**
+ * Normalizes raw API JSON into the flat RcsCardContent format.
+ *
+ * The Twilio API returns rich content wrapped under a content-type key:
+ *   { "twilio/card": { title: "...", body: null, ... } }
+ *
+ * This function detects that wrapper and extracts the inner object,
+ * setting `content_type` accordingly. If the input is already in the
+ * flat format (has a `content_type` string property), it is returned as-is.
+ */
+export const normalizeRcsContent = (raw: Record<string, unknown>): RcsCardContent => {
+  // Already in flat format
+  // eslint-disable-next-line camelcase
+  if (typeof raw.content_type === 'string') {
+    return raw as unknown as RcsCardContent;
+  }
+
+  // Look for a wrapper key like "twilio/card", "twilio/media", etc.
+  const wrapperKey = Object.keys(raw).find((key) => key.startsWith('twilio/'));
+  if (wrapperKey && typeof raw[wrapperKey] === 'object' && raw[wrapperKey] !== null) {
+    const inner = raw[wrapperKey] as Record<string, unknown>;
+    // eslint-disable-next-line camelcase
+    return { content_type: wrapperKey, ...inner } as unknown as RcsCardContent;
+  }
+
+  // Fallback: treat as unknown content type
+  // eslint-disable-next-line camelcase
+  return { content_type: 'unknown', ...raw } as unknown as RcsCardContent;
 };
 
 export const classifyRcsContent = (content: RcsCardContent): ClassificationResult => {

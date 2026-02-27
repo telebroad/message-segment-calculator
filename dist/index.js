@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.classifyRcsContent = exports.RcsRichContentMessage = exports.RcsSegmentedMessage = exports.SegmentedMessage = void 0;
+exports.normalizeRcsContent = exports.classifyRcsContent = exports.RcsRichContentMessage = exports.RcsSegmentedMessage = exports.SegmentedMessage = void 0;
 // eslint-disable-next-line import/no-unused-modules
 var SegmentedMessage_1 = require("./libs/SegmentedMessage");
 Object.defineProperty(exports, "SegmentedMessage", { enumerable: true, get: function () { return SegmentedMessage_1.SegmentedMessage; } });
@@ -13,4 +13,5 @@ Object.defineProperty(exports, "RcsRichContentMessage", { enumerable: true, get:
 // eslint-disable-next-line import/no-unused-modules
 var RcsCardContent_1 = require("./libs/RcsCardContent");
 Object.defineProperty(exports, "classifyRcsContent", { enumerable: true, get: function () { return RcsCardContent_1.classifyRcsContent; } });
+Object.defineProperty(exports, "normalizeRcsContent", { enumerable: true, get: function () { return RcsCardContent_1.normalizeRcsContent; } });
 //# sourceMappingURL=index.js.map

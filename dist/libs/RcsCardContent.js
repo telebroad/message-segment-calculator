@@ -1,9 +1,22 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.classifyRcsContent = void 0;
+exports.classifyRcsContent = exports.normalizeRcsContent = void 0;
 var RICH_MEDIA = 'Rich media';
 var RICH = 'Rich';
-var isPresent = function (value) { return typeof value === 'string' && value.trim().length > 0; };
+var isPresent = function (value) {
+    return typeof value === 'string' && value.trim().length > 0;
+};
 var hasMedia = function (content) {
     if (!content.media)
         return false;
@@ -14,8 +27,40 @@ var hasMedia = function (content) {
 var hasWebviewAction = function (content) {
     if (!content.actions)
         return false;
-    return content.actions.some(function (action) { return action.type === 'url' && isPresent(action.webview_size) && action.webview_size !== 'NONE'; });
+    return content.actions.some(function (action) {
+        var type = action.type.toLowerCase();
+        var size = typeof action.webview_size === 'string' ? action.webview_size.toUpperCase() : '';
+        return type === 'url' && size !== '' && size !== 'NONE';
+    });
 };
+/**
+ * Normalizes raw API JSON into the flat RcsCardContent format.
+ *
+ * The Twilio API returns rich content wrapped under a content-type key:
+ *   { "twilio/card": { title: "...", body: null, ... } }
+ *
+ * This function detects that wrapper and extracts the inner object,
+ * setting `content_type` accordingly. If the input is already in the
+ * flat format (has a `content_type` string property), it is returned as-is.
+ */
+var normalizeRcsContent = function (raw) {
+    // Already in flat format
+    // eslint-disable-next-line camelcase
+    if (typeof raw.content_type === 'string') {
+        return raw;
+    }
+    // Look for a wrapper key like "twilio/card", "twilio/media", etc.
+    var wrapperKey = Object.keys(raw).find(function (key) { return key.startsWith('twilio/'); });
+    if (wrapperKey && typeof raw[wrapperKey] === 'object' && raw[wrapperKey] !== null) {
+        var inner = raw[wrapperKey];
+        // eslint-disable-next-line camelcase
+        return __assign({ content_type: wrapperKey }, inner);
+    }
+    // Fallback: treat as unknown content type
+    // eslint-disable-next-line camelcase
+    return __assign({ content_type: 'unknown' }, raw);
+};
+exports.normalizeRcsContent = normalizeRcsContent;
 var classifyRcsContent = function (content) {
     var richMedia = { classification: RICH_MEDIA, billableText: '' };
     // Non-twilio/card content types are always Rich media

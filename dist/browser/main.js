@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var segmenter_1 = require("./segmenter");
 var renderer_1 = require("./renderer");
+var RcsCardContent_1 = require("../libs/RcsCardContent");
 var getElement = function (id) {
     var element = document.getElementById(id);
     if (!element) {
@@ -74,7 +75,8 @@ var init = function () {
                 return;
             }
             try {
-                var content = JSON.parse(message);
+                var raw = JSON.parse(message);
+                var content = (0, RcsCardContent_1.normalizeRcsContent)(raw);
                 var rcsAnalysis = (0, segmenter_1.analyzeRcsRichContent)(content, rcsRegion || 'us');
                 (0, renderer_1.renderRcs)(rcsAnalysis, rcsTargets);
             }

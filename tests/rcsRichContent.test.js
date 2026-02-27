@@ -1,4 +1,4 @@
-const { RcsRichContentMessage, classifyRcsContent } = require('../dist');
+const { RcsRichContentMessage, classifyRcsContent, normalizeRcsContent } = require('../dist');
 
 // Helper to build a minimal twilio/card content object
 const card = (fields = {}) => ({ content_type: 'twilio/card', ...fields });
@@ -324,5 +324,167 @@ describe('RcsRichContentMessage — multi-byte characters', () => {
     const msg = new RcsRichContentMessage(card({ body: '中'.repeat(54) }), 'us');
     expect(msg.numberOfBytes).toBe(162);
     expect(msg.segmentsCount).toBe(2);
+  });
+});
+
+describe('normalizeRcsContent', () => {
+  test('passes through flat format with content_type', () => {
+    const input = { content_type: 'twilio/card', title: 'Hello' };
+    const result = normalizeRcsContent(input);
+    expect(result.content_type).toBe('twilio/card');
+    expect(result.title).toBe('Hello');
+  });
+
+  test('unwraps "twilio/card" wrapper key', () => {
+    const input = { 'twilio/card': { title: 'Hello', body: null, subtitle: null } };
+    const result = normalizeRcsContent(input);
+    expect(result.content_type).toBe('twilio/card');
+    expect(result.title).toBe('Hello');
+    expect(result.body).toBeNull();
+  });
+
+  test('unwraps "twilio/media" wrapper key', () => {
+    const input = { 'twilio/media': { title: 'Image' } };
+    const result = normalizeRcsContent(input);
+    expect(result.content_type).toBe('twilio/media');
+    expect(result.title).toBe('Image');
+  });
+
+  test('fallback for unknown structure', () => {
+    const input = { foo: 'bar' };
+    const result = normalizeRcsContent(input);
+    expect(result.content_type).toBe('unknown');
+  });
+});
+
+describe('classifyRcsContent — null field handling', () => {
+  test('null title treated as absent', () => {
+    const result = classifyRcsContent(card({ title: null, body: 'Hello' }));
+    expect(result.classification).toBe('Rich');
+    expect(result.billableText).toBe('Hello');
+  });
+
+  test('null body treated as absent', () => {
+    const result = classifyRcsContent(card({ title: 'Hello', body: null }));
+    expect(result.classification).toBe('Rich');
+    expect(result.billableText).toBe('Hello');
+  });
+
+  test('null subtitle treated as absent', () => {
+    const result = classifyRcsContent(card({ title: 'Hello', subtitle: null }));
+    expect(result.classification).toBe('Rich');
+  });
+
+  test('null media treated as absent', () => {
+    const result = classifyRcsContent(card({ title: 'Hello', media: null }));
+    expect(result.classification).toBe('Rich');
+  });
+
+  test('null actions treated as absent', () => {
+    const result = classifyRcsContent(card({ title: 'Hello', actions: null }));
+    expect(result.classification).toBe('Rich');
+  });
+});
+
+describe('classifyRcsContent — uppercase action types (real API format)', () => {
+  test('URL with webview_size NONE -> Rich', () => {
+    const result = classifyRcsContent(
+      card({ title: 'Hi', actions: [{ type: 'URL', webview_size: 'NONE' }] }),
+    );
+    expect(result.classification).toBe('Rich');
+  });
+
+  test('URL with webview_size FULL -> Rich media', () => {
+    const result = classifyRcsContent(
+      card({ title: 'Hi', actions: [{ type: 'URL', webview_size: 'FULL' }] }),
+    );
+    expect(result.classification).toBe('Rich media');
+  });
+
+  test('QUICK_REPLY actions -> Rich', () => {
+    const result = classifyRcsContent(
+      card({ title: 'Hi', actions: [{ type: 'QUICK_REPLY', title: 'Yes' }] }),
+    );
+    expect(result.classification).toBe('Rich');
+  });
+
+  test('PHONE actions -> Rich', () => {
+    const result = classifyRcsContent(
+      card({ title: 'Hi', actions: [{ type: 'PHONE', phone: '+15551234567' }] }),
+    );
+    expect(result.classification).toBe('Rich');
+  });
+});
+
+describe('End-to-end: real Twilio API JSON format', () => {
+  test('title-only with URL(NONE) and QUICK_REPLY -> Rich', () => {
+    const raw = {
+      'twilio/card': {
+        title: 'a]'.repeat(160),
+        body: null,
+        subtitle: null,
+        media: [],
+        actions: [
+          { type: 'URL', title: 'Visit', url: 'https://example.com', webview_size: 'NONE' },
+          { type: 'QUICK_REPLY', title: 'Yes' },
+          { type: 'QUICK_REPLY', title: 'No' },
+        ],
+      },
+    };
+    const content = normalizeRcsContent(raw);
+    const result = classifyRcsContent(content);
+    expect(result.classification).toBe('Rich');
+    expect(result.billableText).toBe('a]'.repeat(160));
+  });
+
+  test('body + subtitle with title null -> Rich', () => {
+    const raw = {
+      'twilio/card': {
+        title: null,
+        body: 'Your order has shipped',
+        subtitle: 'Track it now',
+        media: null,
+        actions: [],
+      },
+    };
+    const content = normalizeRcsContent(raw);
+    const result = classifyRcsContent(content);
+    expect(result.classification).toBe('Rich');
+    expect(result.billableText).toBe('Your order has shipped\nTrack it now');
+  });
+
+  test('title + subtitle present -> Rich media', () => {
+    const raw = {
+      'twilio/card': {
+        title: 'Order Update',
+        body: null,
+        subtitle: 'Details inside',
+        media: [],
+        actions: [],
+      },
+    };
+    const content = normalizeRcsContent(raw);
+    const result = classifyRcsContent(content);
+    expect(result.classification).toBe('Rich media');
+  });
+
+  test('RcsRichContentMessage with normalized API payload', () => {
+    const raw = {
+      'twilio/card': {
+        title: 'Hello from Twilio RCS!',
+        body: null,
+        subtitle: null,
+        media: [],
+        actions: [
+          { type: 'QUICK_REPLY', title: 'Yes' },
+          { type: 'QUICK_REPLY', title: 'No' },
+        ],
+      },
+    };
+    const content = normalizeRcsContent(raw);
+    const msg = new RcsRichContentMessage(content, 'us');
+    expect(msg.messageType).toBe('Rich');
+    expect(msg.numberOfBytes).toBe(22);
+    expect(msg.segmentsCount).toBe(1);
   });
 });
