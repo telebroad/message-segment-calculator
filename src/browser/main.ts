@@ -1,6 +1,7 @@
-import { analyzeRcs, analyzeSms } from './segmenter';
-import { renderRcs, renderSms, SmsRenderTargets, RcsRenderTargets } from './renderer';
+import { analyzeRcs, analyzeRcsRichContent, analyzeSms } from './segmenter';
+import { renderRcs, renderRcsError, renderSms, SmsRenderTargets, RcsRenderTargets } from './renderer';
 import type { RcsRegion } from '../libs/RcsSegmentedMessage';
+import type { RcsCardContent } from '../libs/RcsCardContent';
 import type { SmsEncodingSetting } from './types';
 
 const getElement = <T extends HTMLElement>(id: string): T => {
@@ -54,6 +55,7 @@ const init = (): void => {
     detailBilling: getElement('rcs-billing-detail'),
     charCount: getElement('rcs-char-count'),
     warning: getElement('rcs-warning'),
+    error: getElement('rcs-error'),
   };
 
   const updateAll = (): void => {
@@ -63,6 +65,7 @@ const init = (): void => {
     const encoding = encodingSelect.value as SmsEncodingSetting;
     const smartEncoding = getRadioValue('smart-encoding') === 'yes';
     const rcsRegion = getRadioValue('rcs-region') as RcsRegion;
+    const rcsInputMode = getRadioValue('rcs-input-mode') || 'text';
 
     let smsError: string | undefined;
     let smsAnalysis;
@@ -75,8 +78,23 @@ const init = (): void => {
 
     renderSms(smsAnalysis, smsTargets, smsError);
 
-    const rcsAnalysis = analyzeRcs(message, rcsRegion || 'us');
-    renderRcs(rcsAnalysis, rcsTargets);
+    if (rcsInputMode === 'json') {
+      if (message.trim().length === 0) {
+        renderRcsError(rcsTargets, 'Enter a twilio/card JSON payload to analyze.');
+        return;
+      }
+      try {
+        const content = JSON.parse(message) as RcsCardContent;
+        const rcsAnalysis = analyzeRcsRichContent(content, rcsRegion || 'us');
+        renderRcs(rcsAnalysis, rcsTargets);
+      } catch (e) {
+        const msg = e instanceof SyntaxError ? e.message : 'Invalid JSON.';
+        renderRcsError(rcsTargets, `Invalid JSON: ${msg}`);
+      }
+    } else {
+      const rcsAnalysis = analyzeRcs(message, rcsRegion || 'us');
+      renderRcs(rcsAnalysis, rcsTargets);
+    }
   };
 
   messageInput.addEventListener('input', updateAll);
@@ -87,6 +105,10 @@ const init = (): void => {
   });
 
   document.querySelectorAll('input[name="rcs-region"]').forEach((input) => {
+    input.addEventListener('change', updateAll);
+  });
+
+  document.querySelectorAll('input[name="rcs-input-mode"]').forEach((input) => {
     input.addEventListener('change', updateAll);
   });
 

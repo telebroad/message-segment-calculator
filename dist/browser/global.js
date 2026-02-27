@@ -16,4 +16,5 @@ function getGlobalRoot() {
 var root = getGlobalRoot();
 root.SegmentedMessage = __1.SegmentedMessage;
 root.RcsSegmentedMessage = __1.RcsSegmentedMessage;
+root.RcsRichContentMessage = __1.RcsRichContentMessage;
 //# sourceMappingURL=global.js.map

@@ -35,6 +35,7 @@ export interface RcsRenderTargets {
   detailBilling: HTMLElement;
   charCount: HTMLElement;
   warning: HTMLElement;
+  error: HTMLElement;
 }
 
 const clearChildren = (element: HTMLElement): void => {
@@ -199,12 +200,39 @@ export const renderSms = (analysis: SmsAnalysis, targets: SmsRenderTargets, erro
 };
 
 export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): void => {
+  // Clear any previous error
+  targets.error.textContent = '';
+  targets.error.setAttribute('hidden', 'true');
+
   targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
   targets.encodingValue.textContent = analysis.encodingLabel;
+  targets.messageType.textContent = analysis.messageType;
+
+  const isRichMedia = analysis.messageType === 'Rich media';
+
+  if (isRichMedia) {
+    targets.characters.textContent = 'N/A';
+    targets.segments.textContent = 'N/A';
+    targets.segments.classList.remove('is-multi');
+    targets.remaining.textContent = 'N/A';
+    targets.remaining.classList.remove('is-low');
+    targets.size.textContent = 'N/A';
+
+    targets.segmentTape.style.display = 'none';
+
+    targets.detailsText.textContent = 'Rich media messages are billed at a flat per-message rate.';
+    targets.detailBilling.textContent = 'Rich media (flat rate)';
+    targets.detailSize.textContent = 'N/A';
+    targets.detailBytes.textContent = 'N/A';
+    targets.charCount.textContent = 'N/A';
+    targets.warning.textContent = '';
+    targets.warning.setAttribute('hidden', 'true');
+    return;
+  }
+
   targets.characters.textContent = analysis.characters.toString();
   targets.segments.textContent = analysis.segmentsCount.toString();
   targets.segments.classList.toggle('is-multi', analysis.segmentsCount > 1);
-  targets.messageType.textContent = analysis.messageType;
   targets.remaining.textContent = analysis.remaining.toString();
   targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
   targets.size.textContent = `${analysis.messageSize} bits`;
@@ -238,4 +266,25 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
     targets.warning.textContent = '';
     targets.warning.setAttribute('hidden', 'true');
   }
+};
+
+export const renderRcsError = (targets: RcsRenderTargets, errorMessage: string): void => {
+  targets.error.textContent = errorMessage;
+  targets.error.removeAttribute('hidden');
+
+  targets.characters.textContent = '—';
+  targets.segments.textContent = '—';
+  targets.segments.classList.remove('is-multi');
+  targets.messageType.textContent = '—';
+  targets.remaining.textContent = '—';
+  targets.remaining.classList.remove('is-low');
+  targets.size.textContent = '—';
+  targets.segmentTape.style.display = 'none';
+  targets.detailsText.textContent = '';
+  targets.detailSize.textContent = '—';
+  targets.detailBytes.textContent = '—';
+  targets.detailBilling.textContent = '—';
+  targets.charCount.textContent = '—';
+  targets.warning.textContent = '';
+  targets.warning.setAttribute('hidden', 'true');
 };

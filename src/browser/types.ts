@@ -35,4 +35,5 @@ export interface RcsAnalysis {
   remaining: number;
   messageSize: number;
   messageType: string;
+  inputMode?: 'text' | 'json';
 }

@@ -1,8 +1,20 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyzeRcs = exports.analyzeSms = void 0;
+exports.analyzeRcsRichContent = exports.analyzeRcs = exports.analyzeSms = void 0;
 var SegmentedMessage_1 = require("../libs/SegmentedMessage");
 var RcsSegmentedMessage_1 = require("../libs/RcsSegmentedMessage");
+var RcsRichContentMessage_1 = require("../libs/RcsRichContentMessage");
 var getSmsCapacity = function (encodingName, segmentsCount) {
     if (encodingName === 'GSM-7') {
         return segmentsCount > 1 ? 153 : 160;
@@ -44,27 +56,24 @@ var analyzeSms = function (message, encoding, smartEncoding) {
     };
 };
 exports.analyzeSms = analyzeSms;
-var analyzeRcs = function (message, region) {
-    var rcsMessage = new RcsSegmentedMessage_1.RcsSegmentedMessage(message, region);
+var buildRcsAnalysis = function (rcsMessage, region, unicodeLength, defaultRemaining, extra) {
     var segments = rcsMessage.segments.map(function (segment) { return ({
         index: segment.index,
         capacity: segment.capacity,
         used: segment.used,
     }); });
     var lastSegment = segments[segments.length - 1];
-    var remaining = lastSegment ? Math.max(0, lastSegment.capacity - lastSegment.used) : 160;
-    return {
-        encoding: 'rcs',
-        encodingLabel: 'UTF-8',
-        region: region,
-        segments: segments,
-        segmentsCount: rcsMessage.segmentsCount,
-        characters: rcsMessage.numberOfBytes,
-        unicodeLength: Array.from(message).length,
-        remaining: remaining,
-        messageSize: rcsMessage.messageSize,
-        messageType: rcsMessage.messageType,
-    };
+    var remaining = lastSegment ? Math.max(0, lastSegment.capacity - lastSegment.used) : defaultRemaining;
+    return __assign({ encoding: 'rcs', encodingLabel: 'UTF-8', region: region, segments: segments, segmentsCount: rcsMessage.segmentsCount, characters: rcsMessage.numberOfBytes, unicodeLength: unicodeLength, remaining: remaining, messageSize: rcsMessage.messageSize, messageType: rcsMessage.messageType }, extra);
+};
+var analyzeRcs = function (message, region) {
+    var rcsMessage = new RcsSegmentedMessage_1.RcsSegmentedMessage(message, region);
+    return buildRcsAnalysis(rcsMessage, region, Array.from(message).length, 160);
 };
 exports.analyzeRcs = analyzeRcs;
+var analyzeRcsRichContent = function (content, region) {
+    var rcsMessage = new RcsRichContentMessage_1.RcsRichContentMessage(content, region);
+    return buildRcsAnalysis(rcsMessage, region, Array.from(rcsMessage.billableText).length, 0, { inputMode: 'json' });
+};
+exports.analyzeRcsRichContent = analyzeRcsRichContent;
 //# sourceMappingURL=segmenter.js.map

@@ -1,7 +1,8 @@
 import { countUtf8Bytes } from './textUtils';
+import { RcsCardContent, classifyRcsContent } from './RcsCardContent';
+import type { RcsRegion } from './RcsSegmentedMessage';
 
-export type RcsRegion = 'us' | 'international';
-type RcsMessageType = 'Rich' | 'Basic' | 'Single' | 'Rich media';
+type RcsRichMessageType = 'Rich' | 'Basic' | 'Single' | 'Rich media';
 
 interface RcsSegment {
   index: number;
@@ -12,12 +13,14 @@ interface RcsSegment {
 const RCS_SEGMENT_CAPACITY_BYTES = 160;
 const VALID_REGIONS: readonly RcsRegion[] = ['us', 'international'];
 
-export class RcsSegmentedMessage {
+export class RcsRichContentMessage {
   encodingName = 'UTF-8' as const;
 
-  message: string;
+  content: RcsCardContent;
 
   region: RcsRegion;
+
+  billableText: string;
 
   numberOfBytes: number;
 
@@ -29,16 +32,31 @@ export class RcsSegmentedMessage {
 
   segments: RcsSegment[];
 
-  messageType: RcsMessageType;
+  messageType: RcsRichMessageType;
 
-  constructor(message: string, region: RcsRegion = 'us') {
+  constructor(content: RcsCardContent, region: RcsRegion = 'us') {
     if (!VALID_REGIONS.includes(region)) {
       throw new Error(`Invalid region "${region}". Must be one of: ${VALID_REGIONS.join(', ')}`);
     }
-    this.message = message;
+
+    this.content = content;
     this.region = region;
 
-    const utf8Bytes = countUtf8Bytes(message);
+    const { classification, billableText } = classifyRcsContent(content);
+    this.billableText = billableText;
+
+    if (classification === 'Rich media') {
+      this.messageType = 'Rich media';
+      this.numberOfBytes = 0;
+      this.messageSize = 0;
+      this.totalSize = 0;
+      this.segmentsCount = 0;
+      this.segments = [];
+      return;
+    }
+
+    // Rich classification — segment based on billableText
+    const utf8Bytes = countUtf8Bytes(billableText);
     this.numberOfBytes = utf8Bytes;
     this.messageSize = utf8Bytes * 8;
     this.totalSize = this.messageSize;
@@ -62,11 +80,6 @@ export class RcsSegmentedMessage {
         remaining -= used;
       }
     } else {
-      /*
-       * International: no segmentation. Capacity equals actual byte count so the
-       * UI tape never shows "over capacity." Billing is purely classification-based:
-       * Basic (≤160 bytes) or Single (>160 bytes).
-       */
       this.segmentsCount = 1;
       this.messageType = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES ? 'Basic' : 'Single';
       this.segments = [{ index: 0, capacity: utf8Bytes, used: utf8Bytes }];

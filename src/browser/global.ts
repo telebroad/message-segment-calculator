@@ -1,4 +1,4 @@
-import { SegmentedMessage, RcsSegmentedMessage } from '..';
+import { SegmentedMessage, RcsSegmentedMessage, RcsRichContentMessage } from '..';
 
 // Resolve the global object with fallbacks for older runtimes (Safari < 12.1, IE11)
 function getGlobalRoot(): Record<string, unknown> {
@@ -13,3 +13,4 @@ const root = getGlobalRoot();
 
 root.SegmentedMessage = SegmentedMessage;
 root.RcsSegmentedMessage = RcsSegmentedMessage;
+root.RcsRichContentMessage = RcsRichContentMessage;
