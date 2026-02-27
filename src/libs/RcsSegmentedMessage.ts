@@ -10,6 +10,7 @@ interface RcsSegment {
 }
 
 const RCS_SEGMENT_CAPACITY_BYTES = 160;
+const VALID_REGIONS: readonly RcsRegion[] = ['us', 'international'];
 
 export class RcsSegmentedMessage {
   encodingName = 'UTF-8' as const;
@@ -31,6 +32,9 @@ export class RcsSegmentedMessage {
   messageType: RcsMessageType;
 
   constructor(message: string, region: RcsRegion = 'us') {
+    if (!VALID_REGIONS.includes(region)) {
+      throw new Error(`Invalid region "${region}". Must be one of: ${VALID_REGIONS.join(', ')}`);
+    }
     this.message = message;
     this.region = region;
 

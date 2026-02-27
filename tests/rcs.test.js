@@ -150,6 +150,12 @@ describe('RCS UTF-8 byte counting', () => {
     expect(rcsMessage.region).toBe('us');
     expect(rcsMessage.messageType).toBe('Rich');
   });
+
+  test('throws on invalid region', () => {
+    expect(() => new RcsSegmentedMessage('test', 'USA')).toThrow('Invalid region');
+    expect(() => new RcsSegmentedMessage('test', 'intl')).toThrow('Invalid region');
+    expect(() => new RcsSegmentedMessage('test', '')).toThrow('Invalid region');
+  });
 });
 
 describe('RCS International capacity equals usage', () => {

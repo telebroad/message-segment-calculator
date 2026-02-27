@@ -3,10 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RcsSegmentedMessage = void 0;
 var textUtils_1 = require("./textUtils");
 var RCS_SEGMENT_CAPACITY_BYTES = 160;
+var VALID_REGIONS = ['us', 'international'];
 var RcsSegmentedMessage = /** @class */ (function () {
     function RcsSegmentedMessage(message, region) {
         if (region === void 0) { region = 'us'; }
         this.encodingName = 'UTF-8';
+        if (!VALID_REGIONS.includes(region)) {
+            throw new Error("Invalid region \"".concat(region, "\". Must be one of: ").concat(VALID_REGIONS.join(', ')));
+        }
         this.message = message;
         this.region = region;
         var utf8Bytes = (0, textUtils_1.countUtf8Bytes)(message);
