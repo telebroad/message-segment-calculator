@@ -1,4 +1,4 @@
-import { SegmentedMessage } from './libs/SegmentedMessage';
-
 // eslint-disable-next-line import/no-unused-modules
-export { SegmentedMessage };
+export { SegmentedMessage } from './libs/SegmentedMessage';
+// eslint-disable-next-line import/no-unused-modules
+export { RcsSegmentedMessage } from './libs/RcsSegmentedMessage';

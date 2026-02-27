@@ -1,6 +1,6 @@
-# SMS Segment Calculator
+# Messaging Segment Calculator (SMS + RCS)
 
-This repo contains a package for an SMS segments calculator. The package is released as a nodeJS package as well as a browser script. 
+This repo contains a package for SMS and RCS segment calculations. The package is released as a nodeJS package as well as a browser script.
 A browser demo for this package can be accessed [here](https://twiliodeved.github.io/message-segment-calculator/)
 
 ## Usage 
@@ -13,32 +13,38 @@ The package can be installed using:
 npm install --save sms-segments-calculator
 ```
 
-Sample usage: 
+Sample usage:
 
 ```javascript
-const { SegmentedMessage } = require('sms-segments-calculator');
+const { SegmentedMessage, RcsSegmentedMessage } = require('sms-segments-calculator');
 
 const segmentedMessage = new SegmentedMessage('Hello World');
 
 console.log(segmentedMessage.encodingName); // "GSM-7"
 console.log(segmentedMessage.segmentsCount); // "1"
+
+const rcsMessage = new RcsSegmentedMessage('Hello RCS', 'us');
+console.log(rcsMessage.messageType); // "Rich"
+console.log(rcsMessage.segmentsCount); // "1"
 ```
 
 ### Browser
 
-You can add the library to your page using the CDN file: 
+You can add the library to your page using the CDN file:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/TwilioDevEd/message-segment-calculator/docs/scripts/segmentsCalculator.js" integrity="sha256-wXuHVlXNhEWNzRKozzB87Qyi9/3p6LKskjDXFHIMInw=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/TwilioDevEd/message-segment-calculator/docs/scripts/segmentsCalculator.js" integrity="sha256-e2498331ca98c0d43952423be7ff75944f7f29d201da4ee466bd06e59e8054cb" crossorigin="anonymous"></script>
 ```
 
-Alternatively you can add the library to your page using the file [`segmentsCalculator.js`](https://github.com/TwilioDevEd/message-segment-calculator/blob/main/docs/scripts/segmentsCalculator.js) provided in `docs/scripts/` and adding it to your page: 
+Alternatively you can add the library to your page using the file [`segmentsCalculator.js`](https://github.com/TwilioDevEd/message-segment-calculator/blob/main/docs/scripts/segmentsCalculator.js) provided in `docs/scripts/` and adding it to your page:
 
 ```html
 <script type="text/javascript" src="scripts/segmentsCalculator.js"></script>
 ```
 
-And example of usage can be find in [`docs/index.html`](https://github.com/TwilioDevEd/message-segment-calculator/blob/main/docs/index.html)
+Once loaded, the browser bundle exposes `SegmentedMessage` and `RcsSegmentedMessage` as globals.
+
+An example of usage can be find in [`docs/index.html`](https://github.com/TwilioDevEd/message-segment-calculator/blob/main/docs/index.html)
 
 ## Documentation 
 ### `SegmentedMessage` class
@@ -70,12 +76,49 @@ Number of segment(s)
 
 Return an array with the non GSM-7 characters in the body. It can be used to replace character and reduce the number of segments 
 
+### `RcsSegmentedMessage` class
+
+RCS always uses UTF-8. For US destinations, messages are billed per 160 UTF-8 byte “Rich” segment. For international destinations, there is no segmentation: `<=160` bytes is billed as `Basic`, and `>160` bytes is billed as `Single`.
+
+#### `constructor(message, region)`
+Arguments:
+* `message`: Body of the RCS message
+* `region`: `us` or `international` (default: `us`)
+
+##### `encodingName`
+
+Always returns `"UTF-8"`.
+
+##### `numberOfBytes`
+
+Number of UTF-8 bytes in the message body.
+
+##### `messageSize`
+
+Total size of the message body in bits.
+
+##### `segmentsCount`
+
+Number of RCS segment(s) the message is split into for billing.
+
+##### `segments`
+
+An array with one entry per segment. Each entry contains `index`, `capacity`, and `used` (bytes).
+
+##### `messageType`
+
+Returns `Rich`, `Basic`, or `Single` based on the region and UTF-8 length.
+
+##### `region`
+
+The region used for calculation: `"us"` or `"international"`.
+
 ## Try the library
 
 If you want to test the library you can use the script provided in `playground/index.js`. Install the dependencies (`npm install`) and then run: 
 
 ```shell
-$ node playground/index.js "👋 Hello World 🌍"
+node playground/index.js "👋 Hello World 🌍"
 ```
 
 ## Contributing
@@ -88,6 +131,18 @@ The source code for the library is all contained in the `src` folder. Before sub
 * Compile the code using `npm run build` command and make sure there are no errors
 * Execute the test using `npm test` and make sure all tests pass
 * Transpile the code using `npm run webpack` and test the web page in `docs/index.html`
+
+## Accessibility
+
+The docs UI follows Paste-aligned accessibility guidelines:
+* All color meaning includes a text label (encoding, fill state)
+* Stats updates use `aria-live="polite"` for screen reader announcements
+* Inputs include visible focus styles and associated labels
+* Segment bars use `role=\"meter\"` with value attributes
+
+## Design Inspiration
+
+We used the Kimoby SMS Segment Counter as visual inspiration: https://www.kimoby.com/calculators/sms-segment-counter
 
 ## License
 

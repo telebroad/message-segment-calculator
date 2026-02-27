@@ -1,7 +1,6 @@
 const path = require('path');
 
-module.exports = {
-  entry: './src/index.ts',
+const baseConfig = {
   module: {
     rules: [
       {
@@ -15,11 +14,24 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   mode: 'production',
+};
+
+const libraryConfig = {
+  ...baseConfig,
+  entry: './src/browser/global.ts',
   output: {
     filename: 'segmentsCalculator.js',
     path: path.resolve(__dirname, 'docs/scripts/'),
-    libraryTarget: "var",
-    libraryExport: "SegmentedMessage",
-    library: "SegmentedMessage"
   },
 };
+
+const appConfig = {
+  ...baseConfig,
+  entry: './src/browser/main.ts',
+  output: {
+    filename: 'app.js',
+    path: path.resolve(__dirname, 'docs/scripts/'),
+  },
+};
+
+module.exports = [libraryConfig, appConfig];

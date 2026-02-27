@@ -40,11 +40,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SegmentedMessage = void 0;
-var grapheme_splitter_1 = __importDefault(require("grapheme-splitter"));
 var Segment_1 = __importDefault(require("./Segment"));
 var EncodedChar_1 = __importDefault(require("./EncodedChar"));
 var UnicodeToGSM_1 = __importDefault(require("./UnicodeToGSM"));
 var SmartEncodingMap_1 = __importDefault(require("./SmartEncodingMap"));
+var textUtils_1 = require("./textUtils");
 var validEncodingValues = ['GSM-7', 'UCS-2', 'auto'];
 /**
  * Class representing a segmented SMS
@@ -58,12 +58,10 @@ var SegmentedMessage = /** @class */ (function () {
      * @param {boolean} [encoding] Optional: encoding. It can be 'GSM-7', 'UCS-2', 'auto'. Default value: 'auto'
      * @param {boolean} smartEncoding Optional: whether or not Twilio's [Smart Encoding](https://www.twilio.com/docs/messaging/services#smart-encoding) is emulated. Default value: false
      * @property {number} numberOfUnicodeScalars  Number of Unicode Scalars (i.e. unicode pairs) the message is made of
-     *
      */
     function SegmentedMessage(message, encoding, smartEncoding) {
         if (encoding === void 0) { encoding = 'auto'; }
         if (smartEncoding === void 0) { smartEncoding = false; }
-        var splitter = new grapheme_splitter_1.default();
         if (!validEncodingValues.includes(encoding)) {
             throw new Error("Encoding ".concat(encoding, " not supported. Valid values for encoding are ").concat(validEncodingValues.join(', ')));
         }
@@ -74,10 +72,7 @@ var SegmentedMessage = /** @class */ (function () {
         /**
          * @property {string[]} graphemes Graphemes (array of strings) the message have been split into
          */
-        this.graphemes = splitter.splitGraphemes(message).reduce(function (accumulator, grapheme) {
-            var result = grapheme === '\r\n' ? grapheme.split('') : [grapheme];
-            return accumulator.concat(result);
-        }, []);
+        this.graphemes = (0, textUtils_1.splitGraphemes)(message);
         /**
          * @property {number} numberOfUnicodeScalars  Number of Unicode Scalars (i.e. unicode pairs) the message is made of
          * Some characters (e.g. extended emoji) can be made of more than one unicode pair

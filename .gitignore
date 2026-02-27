@@ -36,3 +36,6 @@ typings/
 .env
 
 .DS_Store
+
+# Context files (not for commits)
+.context/
