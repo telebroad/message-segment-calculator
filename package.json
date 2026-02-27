@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
-    "chalk": "^5.2.0",
+    "chalk": "^4.1.2",
     "eslint": "^8.31.0",
     "eslint-config-twilio-ts": "^2.0.0",
     "jest": "^29.3.1",
