@@ -2,6 +2,10 @@ import { SegmentedMessage } from '../libs/SegmentedMessage';
 import { RcsSegmentedMessage, RcsRegion } from '../libs/RcsSegmentedMessage';
 import type { SegmentData, SmsAnalysis, SmsEncodingSetting, RcsAnalysis } from './types';
 
+/*
+ * Segment extends Array and contains EncodedChar | UserDataHeader elements.
+ * This type mirrors the subset of properties we access for counting.
+ */
 type SegmentElement = {
   isReservedChar?: boolean;
   codeUnits?: number[];

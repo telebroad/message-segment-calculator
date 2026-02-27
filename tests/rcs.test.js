@@ -314,3 +314,52 @@ describe('RCS edge cases', () => {
     expect(rcsMessage.numberOfBytes).toBe(18);
   });
 });
+
+describe('RCS API character limit boundary', () => {
+  test('exactly 1,600 ASCII chars is within the limit', () => {
+    const message = 'a'.repeat(1600);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    expect(rcsMessage.numberOfBytes).toBe(1600);
+    expect(rcsMessage.segmentsCount).toBe(10);
+  });
+
+  test('1,601 ASCII chars exceeds the limit', () => {
+    const message = 'a'.repeat(1601);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    expect(rcsMessage.numberOfBytes).toBe(1601);
+    // The library correctly calculates segments; the 1,600 limit
+    // is enforced at the API layer, not the library layer
+    expect(rcsMessage.segmentsCount).toBe(11);
+  });
+
+  test('1,600 multi-byte chars produces more than 1,600 bytes', () => {
+    // 1,600 × é(2 bytes) = 3,200 bytes
+    const message = 'é'.repeat(1600);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    expect(rcsMessage.numberOfBytes).toBe(3200);
+  });
+});
+
+describe('RCS performance', () => {
+  test('handles 10,000 byte messages efficiently', () => {
+    const start = Date.now();
+    const message = 'a'.repeat(10000);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    const elapsed = Date.now() - start;
+
+    expect(rcsMessage.segmentsCount).toBe(63);
+    expect(elapsed).toBeLessThan(100);
+  });
+
+  test('handles large multi-byte messages efficiently', () => {
+    const start = Date.now();
+    // 5,000 emoji × 4 bytes = 20,000 bytes
+    const message = '😀'.repeat(5000);
+    const rcsMessage = new RcsSegmentedMessage(message, 'us');
+    const elapsed = Date.now() - start;
+
+    expect(rcsMessage.numberOfBytes).toBe(20000);
+    expect(rcsMessage.segmentsCount).toBe(125);
+    expect(elapsed).toBeLessThan(100);
+  });
+});

@@ -58,6 +58,11 @@ export class RcsSegmentedMessage {
         remaining -= used;
       }
     } else {
+      /*
+       * International: no segmentation. Capacity equals actual byte count so the
+       * UI tape never shows "over capacity." Billing is purely classification-based:
+       * Basic (≤160 bytes) or Single (>160 bytes).
+       */
       this.segmentsCount = 1;
       this.messageType = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES ? 'Basic' : 'Single';
       this.segments = [{ index: 0, capacity: utf8Bytes, used: utf8Bytes }];
