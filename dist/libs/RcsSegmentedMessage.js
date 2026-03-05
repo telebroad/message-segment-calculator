@@ -37,9 +37,9 @@ var RcsSegmentedMessage = /** @class */ (function () {
         }
         else {
             /*
-             * International: no segmentation. Capacity reflects the billing tier limit
-             * so the UI shows meaningful remaining capacity.
+             * International: no segmentation. Billing is classification-based:
              * Basic (≤160 bytes) or Single (>160 bytes).
+             * Capacity reflects the tier limit so the UI shows meaningful "remaining."
              */
             this.segmentsCount = 1;
             var isBasic = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES;

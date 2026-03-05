@@ -171,7 +171,7 @@ describe('RCS International capacity reflects tier limit', () => {
     expect(rcsMessage.segments[0].used).toBe(500);
   });
 
-  test('International with multi-byte characters capacity reflects tier', () => {
+  test('International with multi-byte characters uses tier capacity', () => {
     // 100 CJK chars × 3 bytes = 300 bytes (Single)
     const message = '中'.repeat(100);
     const rcsMessage = new RcsSegmentedMessage(message, 'international');
