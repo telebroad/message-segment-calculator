@@ -139,19 +139,6 @@
         <div class="calculator-body">
         <div class="panel control-panel">
           <div class="control-group">
-            <span class="control-label">Input mode</span>
-            <div class="toggle-group" role="radiogroup" aria-label="RCS input mode">
-              <label class="toggle-option">
-                <input type="radio" name="rcs-input-mode" value="text" checked />
-                <span>Plain Text</span>
-              </label>
-              <label class="toggle-option">
-                <input type="radio" name="rcs-input-mode" value="json" />
-                <span>Rich Content (JSON)</span>
-              </label>
-            </div>
-          </div>
-          <div class="control-group">
             <span class="control-label">Recipient region</span>
             <div class="toggle-group" role="radiogroup" aria-label="Recipient region">
               <label class="toggle-option">
@@ -165,7 +152,11 @@
             </div>
           </div>
         </div>
-        <div class="detail-warning" id="rcs-error" hidden></div>
+        <div class="detail-info" id="rcs-rich-note">
+          <strong>Note:</strong> This calculator covers plain-text RCS messages billed as <em>Rich</em> (per 160-byte UTF-8 segment).
+          Rich media messages (cards with images, multiple text fields, or webviews) are billed at a flat per-message rate with no segmentation.
+          <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.
+        </div>
         <div class="stats-bar" id="rcs-stats" aria-live="polite">
           <div class="stat-chip encoding-badge" id="rcs-encoding-badge" data-encoding="rcs">
             <span class="stat-label">Encoding</span>

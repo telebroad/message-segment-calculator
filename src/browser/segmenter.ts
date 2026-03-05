@@ -1,7 +1,5 @@
 import { SegmentedMessage } from '../libs/SegmentedMessage';
 import { RcsSegmentedMessage, RcsRegion } from '../libs/RcsSegmentedMessage';
-import { RcsRichContentMessage } from '../libs/RcsRichContentMessage';
-import type { RcsCardContent } from '../libs/RcsCardContent';
 import type { SegmentData, SmsAnalysis, SmsEncodingSetting, RcsAnalysis } from './types';
 
 /*
@@ -57,28 +55,15 @@ export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartE
   };
 };
 
-interface RcsMessageLike {
-  segments: { index: number; capacity: number; used: number }[];
-  segmentsCount: number;
-  numberOfBytes: number;
-  messageSize: number;
-  messageType: string;
-}
-
-const buildRcsAnalysis = (
-  rcsMessage: RcsMessageLike,
-  region: RcsRegion,
-  unicodeLength: number,
-  defaultRemaining: number,
-  extra?: Partial<RcsAnalysis>,
-): RcsAnalysis => {
+export const analyzeRcs = (message: string, region: RcsRegion): RcsAnalysis => {
+  const rcsMessage = new RcsSegmentedMessage(message, region);
   const segments: SegmentData[] = rcsMessage.segments.map((segment) => ({
     index: segment.index,
     capacity: segment.capacity,
     used: segment.used,
   }));
   const lastSegment = segments[segments.length - 1];
-  const remaining = lastSegment ? Math.max(0, lastSegment.capacity - lastSegment.used) : defaultRemaining;
+  const remaining = lastSegment ? Math.max(0, lastSegment.capacity - lastSegment.used) : 160;
 
   return {
     encoding: 'rcs',
@@ -87,20 +72,10 @@ const buildRcsAnalysis = (
     segments,
     segmentsCount: rcsMessage.segmentsCount,
     characters: rcsMessage.numberOfBytes,
-    unicodeLength,
+    unicodeLength: Array.from(message).length,
     remaining,
     messageSize: rcsMessage.messageSize,
     messageType: rcsMessage.messageType,
-    ...extra,
   };
 };
 
-export const analyzeRcs = (message: string, region: RcsRegion): RcsAnalysis => {
-  const rcsMessage = new RcsSegmentedMessage(message, region);
-  return buildRcsAnalysis(rcsMessage, region, Array.from(message).length, 160);
-};
-
-export const analyzeRcsRichContent = (content: RcsCardContent, region: RcsRegion): RcsAnalysis => {
-  const rcsMessage = new RcsRichContentMessage(content, region);
-  return buildRcsAnalysis(rcsMessage, region, Array.from(rcsMessage.billableText).length, 0, { inputMode: 'json' });
-};

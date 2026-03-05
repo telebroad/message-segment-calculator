@@ -35,7 +35,6 @@ export interface RcsRenderTargets {
   detailBilling: HTMLElement;
   charCount: HTMLElement;
   warning: HTMLElement;
-  error: HTMLElement;
 }
 
 const clearChildren = (element: HTMLElement): void => {
@@ -200,35 +199,9 @@ export const renderSms = (analysis: SmsAnalysis, targets: SmsRenderTargets, erro
 };
 
 export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): void => {
-  // Clear any previous error
-  targets.error.textContent = '';
-  targets.error.setAttribute('hidden', 'true');
-
   targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
   targets.encodingValue.textContent = analysis.encodingLabel;
   targets.messageType.textContent = analysis.messageType;
-
-  const isRichMedia = analysis.messageType === 'Rich media';
-
-  if (isRichMedia) {
-    targets.characters.textContent = 'N/A';
-    targets.segments.textContent = 'N/A';
-    targets.segments.classList.remove('is-multi');
-    targets.remaining.textContent = 'N/A';
-    targets.remaining.classList.remove('is-low');
-    targets.size.textContent = 'N/A';
-
-    targets.segmentTape.style.display = 'none';
-
-    targets.detailsText.textContent = 'Rich media messages are billed at a flat per-message rate.';
-    targets.detailBilling.textContent = 'Rich media (flat rate)';
-    targets.detailSize.textContent = 'N/A';
-    targets.detailBytes.textContent = 'N/A';
-    targets.charCount.textContent = 'N/A';
-    targets.warning.textContent = '';
-    targets.warning.setAttribute('hidden', 'true');
-    return;
-  }
 
   targets.characters.textContent = analysis.characters.toString();
   targets.segments.textContent = analysis.segmentsCount.toString();
@@ -237,12 +210,8 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
   targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
   targets.size.textContent = `${analysis.messageSize} bits`;
 
-  if (analysis.region === 'us') {
-    targets.segmentTape.style.display = '';
-    renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
-  } else {
-    targets.segmentTape.style.display = 'none';
-  }
+  targets.segmentTape.style.display = '';
+  renderSegmentTape(targets.segmentTape, analysis.segments, 'RCS', 'bytes');
 
   if (analysis.region === 'us') {
     targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
@@ -266,25 +235,4 @@ export const renderRcs = (analysis: RcsAnalysis, targets: RcsRenderTargets): voi
     targets.warning.textContent = '';
     targets.warning.setAttribute('hidden', 'true');
   }
-};
-
-export const renderRcsError = (targets: RcsRenderTargets, errorMessage: string): void => {
-  targets.error.textContent = errorMessage;
-  targets.error.removeAttribute('hidden');
-
-  targets.characters.textContent = '—';
-  targets.segments.textContent = '—';
-  targets.segments.classList.remove('is-multi');
-  targets.messageType.textContent = '—';
-  targets.remaining.textContent = '—';
-  targets.remaining.classList.remove('is-low');
-  targets.size.textContent = '—';
-  targets.segmentTape.style.display = 'none';
-  targets.detailsText.textContent = '';
-  targets.detailSize.textContent = '—';
-  targets.detailBytes.textContent = '—';
-  targets.detailBilling.textContent = '—';
-  targets.charCount.textContent = '—';
-  targets.warning.textContent = '';
-  targets.warning.setAttribute('hidden', 'true');
 };

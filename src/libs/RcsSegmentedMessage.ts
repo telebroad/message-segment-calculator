@@ -1,7 +1,7 @@
 import { countUtf8Bytes } from './textUtils';
 
 export type RcsRegion = 'us' | 'international';
-type RcsMessageType = 'Rich' | 'Basic' | 'Single' | 'Rich media';
+type RcsMessageType = 'Rich' | 'Basic' | 'Single';
 
 interface RcsSegment {
   index: number;
@@ -10,6 +10,7 @@ interface RcsSegment {
 }
 
 const RCS_SEGMENT_CAPACITY_BYTES = 160;
+const RCS_SINGLE_CAPACITY_BYTES = 1600;
 const VALID_REGIONS: readonly RcsRegion[] = ['us', 'international'];
 
 export class RcsSegmentedMessage {
@@ -63,13 +64,15 @@ export class RcsSegmentedMessage {
       }
     } else {
       /*
-       * International: no segmentation. Capacity equals actual byte count so the
-       * UI tape never shows "over capacity." Billing is purely classification-based:
+       * International: no segmentation. Capacity reflects the billing tier limit
+       * so the UI shows meaningful remaining capacity.
        * Basic (≤160 bytes) or Single (>160 bytes).
        */
       this.segmentsCount = 1;
-      this.messageType = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES ? 'Basic' : 'Single';
-      this.segments = [{ index: 0, capacity: utf8Bytes, used: utf8Bytes }];
+      const isBasic = utf8Bytes <= RCS_SEGMENT_CAPACITY_BYTES;
+      this.messageType = isBasic ? 'Basic' : 'Single';
+      const capacity = isBasic ? RCS_SEGMENT_CAPACITY_BYTES : RCS_SINGLE_CAPACITY_BYTES;
+      this.segments = [{ index: 0, capacity, used: utf8Bytes }];
     }
   }
 }

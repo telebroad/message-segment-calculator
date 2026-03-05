@@ -1,5 +1,5 @@
 export type RcsRegion = 'us' | 'international';
-type RcsMessageType = 'Rich' | 'Basic' | 'Single' | 'Rich media';
+type RcsMessageType = 'Rich' | 'Basic' | 'Single';
 interface RcsSegment {
     index: number;
     capacity: number;

@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var segmenter_1 = require("./segmenter");
 var renderer_1 = require("./renderer");
-var RcsCardContent_1 = require("../libs/RcsCardContent");
 var getElement = function (id) {
     var element = document.getElementById(id);
     if (!element) {
@@ -50,7 +49,6 @@ var init = function () {
         detailBilling: getElement('rcs-billing-detail'),
         charCount: getElement('rcs-char-count'),
         warning: getElement('rcs-warning'),
-        error: getElement('rcs-error'),
     };
     var updateAll = function () {
         var message = messageInput.value;
@@ -58,7 +56,6 @@ var init = function () {
         var encoding = encodingSelect.value;
         var smartEncoding = getRadioValue('smart-encoding') === 'yes';
         var rcsRegion = getRadioValue('rcs-region');
-        var rcsInputMode = getRadioValue('rcs-input-mode') || 'text';
         var smsError;
         var smsAnalysis;
         try {
@@ -69,26 +66,8 @@ var init = function () {
             smsAnalysis = (0, segmenter_1.analyzeSms)(message, 'auto', smartEncoding);
         }
         (0, renderer_1.renderSms)(smsAnalysis, smsTargets, smsError);
-        if (rcsInputMode === 'json') {
-            if (message.trim().length === 0) {
-                (0, renderer_1.renderRcsError)(rcsTargets, 'Enter a twilio/card JSON payload to analyze.');
-                return;
-            }
-            try {
-                var raw = JSON.parse(message);
-                var content = (0, RcsCardContent_1.normalizeRcsContent)(raw);
-                var rcsAnalysis = (0, segmenter_1.analyzeRcsRichContent)(content, rcsRegion || 'us');
-                (0, renderer_1.renderRcs)(rcsAnalysis, rcsTargets);
-            }
-            catch (e) {
-                var msg = e instanceof SyntaxError ? e.message : 'Invalid JSON.';
-                (0, renderer_1.renderRcsError)(rcsTargets, "Invalid JSON: ".concat(msg));
-            }
-        }
-        else {
-            var rcsAnalysis = (0, segmenter_1.analyzeRcs)(message, rcsRegion || 'us');
-            (0, renderer_1.renderRcs)(rcsAnalysis, rcsTargets);
-        }
+        var rcsAnalysis = (0, segmenter_1.analyzeRcs)(message, rcsRegion || 'us');
+        (0, renderer_1.renderRcs)(rcsAnalysis, rcsTargets);
     };
     messageInput.addEventListener('input', updateAll);
     encodingSelect.addEventListener('change', updateAll);
@@ -96,9 +75,6 @@ var init = function () {
         input.addEventListener('change', updateAll);
     });
     document.querySelectorAll('input[name="rcs-region"]').forEach(function (input) {
-        input.addEventListener('change', updateAll);
-    });
-    document.querySelectorAll('input[name="rcs-input-mode"]').forEach(function (input) {
         input.addEventListener('change', updateAll);
     });
     updateAll();
