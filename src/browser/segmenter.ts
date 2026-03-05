@@ -78,4 +78,3 @@ export const analyzeRcs = (message: string, region: RcsRegion): RcsAnalysis => {
     messageType: rcsMessage.messageType,
   };
 };
-
