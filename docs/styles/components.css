@@ -543,11 +543,11 @@ h2 {
   position: relative;
 }
 
-.char-block.seg-0 { background: #1a3a5c; color: #CCE4FF; }
-.char-block.seg-1 { background: #1a3d2a; color: #D1FAE0; }
-.char-block.seg-2 { background: #3d2a1a; color: #FDDCC4; }
-.char-block.seg-3 { background: #3d3518; color: #FFF1B3; }
-.char-block.seg-4 { background: #2d1f3d; color: #E7DCFA; }
+.char-block.seg-0 { background: var(--color-seg-0-bg); color: var(--color-seg-0-fg); }
+.char-block.seg-1 { background: var(--color-seg-1-bg); color: var(--color-seg-1-fg); }
+.char-block.seg-2 { background: var(--color-seg-2-bg); color: var(--color-seg-2-fg); }
+.char-block.seg-3 { background: var(--color-seg-3-bg); color: var(--color-seg-3-fg); }
+.char-block.seg-4 { background: var(--color-seg-4-bg); color: var(--color-seg-4-fg); }
 
 .char-block.non-gsm {
   border-color: var(--color-error);

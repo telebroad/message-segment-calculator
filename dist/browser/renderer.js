@@ -99,8 +99,13 @@ var renderCharDetail = function (container, charDetails) {
         }
         var display = detail.raw.trim() === '' ? '\u00B7' : detail.raw;
         block.textContent = display;
+        var encoding = detail.isGSM7 ? 'GSM-7' : 'UCS-2';
         var codeHex = detail.codeUnits.map(function (u) { return "0x".concat(u.toString(16).toUpperCase().padStart(4, '0')); }).join(' ');
-        block.title = "".concat(detail.isGSM7 ? 'GSM-7' : 'UCS-2', " | Segment ").concat(detail.segmentIndex + 1, " | ").concat(codeHex);
+        var label = "".concat(encoding, " | Segment ").concat(detail.segmentIndex + 1, " | ").concat(codeHex);
+        block.title = label;
+        block.setAttribute('tabindex', '0');
+        block.setAttribute('role', 'img');
+        block.setAttribute('aria-label', "".concat(display === '\u00B7' ? 'whitespace' : display, ": ").concat(label));
         container.appendChild(block);
     });
 };

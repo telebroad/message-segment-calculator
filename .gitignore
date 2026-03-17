@@ -39,3 +39,6 @@ typings/
 
 # Context files (not for commits)
 .context/
+
+# Claude Code user-specific settings
+.claude/settings.local.json
