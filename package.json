@@ -22,6 +22,8 @@
     "dev": "tsc -w",
     "lint": "eslint --ext ts src/",
     "lint:fix": "npm run lint -- --fix",
+    "precheck": "npm run lint",
+    "check": "npm test",
     "webpack": "webpack --config webpack.config.js",
     "release": "tsc && webpack --config webpack.config.js"
   },
