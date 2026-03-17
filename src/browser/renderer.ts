@@ -1,4 +1,4 @@
-import type { SegmentData, SmsAnalysis, RcsAnalysis } from './types';
+import type { SegmentData, SmsAnalysis, RcsAnalysis, CharDetail } from './types';
 
 const API_CHAR_LIMIT = 1600;
 
@@ -9,6 +9,7 @@ export interface SmsRenderTargets {
   segments: HTMLElement;
   remaining: HTMLElement;
   segmentTape: HTMLElement;
+  charDetailContainer: HTMLElement;
   encodingSummary: HTMLElement;
   messageSize: HTMLElement;
   totalSize: HTMLElement;
@@ -115,6 +116,38 @@ const renderSegmentTape = (
   });
 };
 
+const SEGMENT_COLORS = ['seg-0', 'seg-1', 'seg-2', 'seg-3', 'seg-4'];
+
+const renderCharDetail = (container: HTMLElement, charDetails: CharDetail[]): void => {
+  clearChildren(container);
+
+  if (charDetails.length === 0) {
+    container.hidden = true;
+    return;
+  }
+
+  container.hidden = false;
+
+  charDetails.forEach((detail) => {
+    const block = document.createElement('span');
+    block.className = `char-block ${SEGMENT_COLORS[detail.segmentIndex % SEGMENT_COLORS.length]}`;
+
+    if (!detail.isGSM7) {
+      block.classList.add('non-gsm');
+    }
+
+    const display = detail.raw.trim() === '' ? '\u00B7' : detail.raw;
+    block.textContent = display;
+
+    const codeHex = detail.codeUnits
+      .map((u) => '0x' + u.toString(16).toUpperCase().padStart(4, '0'))
+      .join(' ');
+    block.title = `${detail.isGSM7 ? 'GSM-7' : 'UCS-2'} | Segment ${detail.segmentIndex + 1} | ${codeHex}`;
+
+    container.appendChild(block);
+  });
+};
+
 const updateNonGsmTable = (targets: SmsRenderTargets, nonGsmCharacters: string[]): void => {
   const uniqueCharacters = Array.from(new Set(nonGsmCharacters));
   clearChildren(targets.nonGsmTableBody);
@@ -154,6 +187,7 @@ export const renderSms = (analysis: SmsAnalysis, targets: SmsRenderTargets, erro
   targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
 
   renderSegmentTape(targets.segmentTape, analysis.segments, 'SMS', 'chars');
+  renderCharDetail(targets.charDetailContainer, analysis.charDetails);
 
   targets.messageSize.textContent = `${analysis.messageSize} bits`;
   targets.totalSize.textContent = `${analysis.totalSize} bits`;

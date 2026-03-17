@@ -1,4 +1,15 @@
 "use strict";
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyzeRcs = exports.analyzeSms = void 0;
 var SegmentedMessage_1 = require("../libs/SegmentedMessage");
@@ -29,6 +40,30 @@ var analyzeSms = function (message, encoding, smartEncoding) {
     }); });
     var lastSegment = segments[segments.length - 1];
     var remaining = lastSegment ? Math.max(0, capacity - lastSegment.used) : capacity;
+    var charDetails = [];
+    segmentedMessage.segments.forEach(function (segment, segIdx) {
+        var e_1, _a;
+        try {
+            for (var segment_1 = __values(segment), segment_1_1 = segment_1.next(); !segment_1_1.done; segment_1_1 = segment_1.next()) {
+                var item = segment_1_1.value;
+                if (item.isReservedChar)
+                    continue;
+                charDetails.push({
+                    raw: item.raw,
+                    codeUnits: item.codeUnits || [],
+                    isGSM7: item.isGSM7,
+                    segmentIndex: segIdx,
+                });
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (segment_1_1 && !segment_1_1.done && (_a = segment_1.return)) _a.call(segment_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    });
     return {
         encoding: encodingKind,
         encodingLabel: encodingName === 'GSM-7' ? 'GSM-7' : 'Unicode (UCS-2)',
@@ -41,6 +76,7 @@ var analyzeSms = function (message, encoding, smartEncoding) {
         unicodeScalars: segmentedMessage.numberOfUnicodeScalars,
         nonGsmCharacters: segmentedMessage.getNonGsmCharacters(),
         warnings: segmentedMessage.warnings,
+        charDetails: charDetails,
     };
 };
 exports.analyzeSms = analyzeSms;

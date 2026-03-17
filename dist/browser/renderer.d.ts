@@ -6,6 +6,7 @@ export interface SmsRenderTargets {
     segments: HTMLElement;
     remaining: HTMLElement;
     segmentTape: HTMLElement;
+    charDetailContainer: HTMLElement;
     encodingSummary: HTMLElement;
     messageSize: HTMLElement;
     totalSize: HTMLElement;
