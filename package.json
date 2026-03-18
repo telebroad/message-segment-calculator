@@ -20,8 +20,8 @@
     "test": "tsc && jest",
     "build": "tsc",
     "dev": "tsc -w",
-    "lint": "eslint --ext ts src/",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "eslint --ext ts src/ && eslint --config tests/.eslintrc tests/**/*.js",
+    "lint:fix": "eslint --ext ts src/ --fix && eslint --config tests/.eslintrc tests/**/*.js --fix",
     "precheck": "npm run lint",
     "check": "npm test",
     "webpack": "webpack --config webpack.config.js",
@@ -36,6 +36,9 @@
   "lint-staged": {
     "src/**/*.ts": [
       "eslint --fix"
+    ],
+    "tests/**/*.js": [
+      "eslint --config tests/.eslintrc --fix"
     ]
   },
   "author": "gverni",
