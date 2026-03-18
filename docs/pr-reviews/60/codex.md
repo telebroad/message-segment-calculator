@@ -6,39 +6,42 @@
 
 ## Overview
 
-Restores the per-character detail view removed in the UI redesign (eb01913). Adds a collapsible "Character detail" section to the SMS panel showing each character as an inline block, color-coded by segment, with non-GSM characters highlighted in red. Also adds husky + lint-staged for pre-commit linting.
+Restores the per-character detail view removed in the UI redesign (eb01913). Adds a collapsible "Character detail" section to the SMS panel showing each character as an inline block, color-coded by segment, with non-GSM characters highlighted in red. Also adds husky + lint-staged, Playwright e2e tests, and CI matrix updates.
 
 ## Changes Reviewed
 
-- `src/browser/types.ts` — New `CharDetail` interface with `raw`, `codeUnits`, `isGSM7`, `segmentIndex`
-- `src/browser/segmenter.ts` — `charDetails` extraction from `SegmentedMessage.segments`, filters `isReservedChar` (UDH)
-- `src/browser/renderer.ts` — `renderCharDetail()` with segment coloring, non-GSM highlighting, a11y attributes
-- `src/browser/main.ts` — Wires `sms-char-detail` render target into `SmsRenderTargets`
-- `docs/index.html` — New collapsible "Character detail" `<details>` section in SMS panel
-- `docs/styles/tokens.css` — Segment palette CSS variables (`--color-seg-N-bg/fg`)
-- `docs/styles/components.css` — `.char-block` styles using token variables, `.non-gsm` red highlight
-- `package.json` — husky, lint-staged, `check`/`precheck` scripts, `prepare` hook
-- `.github/workflows/test.js.yml` — CI matrix (reviewed after fix)
+- `src/browser/types.ts` — `CharDetail` interface with `messageEncoding` field
+- `src/browser/segmenter.ts` — `extractCharDetails()` with correct UCS-2 code units
+- `src/browser/renderer.ts` — `renderCharDetail()` using `messageEncoding` for tooltip
+- `src/browser/main.ts` — Wires `charDetailContainer` render target
+- `docs/index.html` — Collapsible "Character detail" section, RCS info note
+- `docs/styles/tokens.css` — Segment palette CSS variables
+- `docs/styles/components.css` — `.char-block` styles, `.non-gsm` highlight
+- `.github/workflows/test.js.yml` — CI matrix `[16, 18, 20, 22]`
+- `tests/e2e/char-detail.spec.ts` — 10 Playwright e2e tests
+- `playwright.config.ts` — Playwright config with auto-serve
+- `package.json` — e2e scripts, jest ignore, husky/lint-staged
 
 ## Review Findings
 
+### Round 1
+
+- [x] **P2: Tooltip encoding/code-units wrong for UCS-2 messages** — FIXED: Added `messageEncoding` to `CharDetail`, renderer uses it for tooltip label, GSM chars in UCS-2 messages now show correct UTF-16 code units
+- [x] **Blocker: CI fails on Node 14.x** — FIXED: Dropped Node 14 (EOL), added 20.x/22.x
+
+### Round 2 (re-review after fixes)
+
+- [ ] P2: **RCS billing note is static** (`docs/index.html:161`) — The `#rcs-rich-note` text says "billed as Rich per 160-byte segment" but this only applies to US destinations. When International is selected, the calculator output correctly shows Basic/Single billing while this note still claims Rich segmentation. Should be dynamic or qualified.
+- [ ] Non-blocker: **lint-staged engine mismatch** — `lint-staged@16.4.0` requires Node >=20.17 in its dependency chain. CI tests Node 16/18 without issue (lint-staged isn't invoked in CI), but `npm install --engine-strict` would fail on Node 18. Consider raising minimum to Node 18 or downgrading lint-staged.
+- [ ] Non-blocker: No unit tests for `charDetails` extraction (e2e tests cover this indirectly)
+
 ### Strengths
-- Clean three-layer separation (types -> segmenter -> renderer) follows existing architecture
-- `CharDetail` extraction correctly filters `isReservedChar` to exclude UDH entries
-- Segment colors use CSS custom properties from `tokens.css`, consistent with design system
-- a11y: char blocks have `tabindex="0"`, `role="img"`, and `aria-label`
-- Whitespace characters display as middle dot for visibility
-
-### Issues
-- [x] P2: **Tooltip shows wrong encoding label and code units for UCS-2 messages** — **FIXED**: Added `messageEncoding` field to `CharDetail`, extracted `extractCharDetails()` helper, renderer now uses `detail.messageEncoding` for tooltip label, and GSM chars in UCS-2 messages now show correct UTF-16 code units (e.g., `@` shows `0x0040` instead of GSM-7 septet `0x0000`).
-- [x] Blocker: CI fails on Node 14.x — husky 9.x uses `||=` syntax (requires Node 15+). **FIXED**: Dropped Node 14 from CI matrix (EOL since April 2023), added Node 20.x/22.x.
-- [ ] Non-blocker: No unit tests for the `charDetails` extraction — a targeted test with a multi-segment UCS-2 message would catch regressions.
-- [ ] Non-blocker: `lint-staged` 16.x requires Node >=18.x (`engines` field). The CI matrix still includes Node 16.x, which may fail if lint-staged is invoked during CI. This only matters if CI runs the pre-commit hook (it doesn't currently), but the engine mismatch is worth noting.
-
-### Recommendations
-- Pass the resolved message encoding (`encodingName`) into `CharDetail` or as a separate field on `SmsAnalysis` so the renderer can display the correct encoding label per character
-- For UCS-2 messages, derive code units from the character's actual UTF-16 representation rather than the GSM-7 septet values
-- Add a unit test that verifies `charDetails` for a message like `"Hello 😀"` — encoding should be UCS-2 for all characters, and code units should be UTF-16
+- Clean three-layer separation (types -> segmenter -> renderer)
+- Correct `isReservedChar` filtering excludes UDH entries
+- CSS custom properties from `tokens.css` for segment colors
+- a11y: `tabindex="0"`, `role="img"`, `aria-label`
+- 10 Playwright e2e tests cover the full manual test plan
+- All 659 unit tests + 10 e2e tests pass, CI green on all 4 Node versions
 
 ## Verdict
-**APPROVED** — P2 encoding/code-unit bug fixed; CI matrix updated
+**APPROVED** — Previous P2 bugs fixed. New P2 (static RCS note) is low-risk and can be addressed as a follow-up.

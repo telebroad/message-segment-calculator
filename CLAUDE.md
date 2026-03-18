@@ -119,9 +119,32 @@ Husky + lint-staged runs `eslint --fix` on staged `src/**/*.ts` files at commit 
 5. Address review feedback
 6. Squash and merge
 
+## E2E Testing (Playwright)
+
+Tests live in `tests/e2e/` and run against the built `docs/` site:
+- Config: `playwright.config.ts` — auto-serves `docs/` on port 8080
+- Results/reports: `tests/e2e/results/` and `tests/e2e/reports/` (gitignored)
+- `tsconfig.json` includes only `src/`; `jest` ignores `tests/e2e/` — this prevents tsc and Jest from picking up Playwright files
+
+Best practices:
+- Use semantic selectors (`#sms-char-detail`, `.char-block`) and Playwright's auto-waiting
+- Check attributes directly (`toHaveAttribute('hidden', '')`) when `toBeHidden()` doesn't work for elements inside open `<details>`
+- Run `npm run release` before e2e tests to ensure `docs/scripts/` bundles are current
+- Always rebuild dist/docs artifacts before committing changes to `src/browser/`
+
+## Codex CLI Review
+
+Run `codex review --base main` for automated code review. For re-reviews after changes:
+```bash
+codex review --base main --title "PR title here"
+```
+Capture findings in `docs/pr-reviews/<PR>/codex.md`. Mark issues as `[x]` when fixed and note which commit resolved them.
+
 ## Common Pitfalls
 
 - `Segment` extends `Array` — iterating with `for...of` works but items include `UserDataHeader` entries. Filter with `isReservedChar` to get only user characters.
+- `EncodedChar.codeUnits` contains GSM-7 septet values for GSM characters, even in UCS-2 messages. When displaying code units for UCS-2 messages, derive UTF-16 values from `raw.charCodeAt()` instead.
+- `EncodedChar.isGSM7` indicates whether a character is in the GSM-7 character set, NOT the message encoding. Use `SegmentedMessage.encodingName` for the actual message encoding.
 - The `docs/scripts/` JS bundles are built artifacts from webpack — always run `npm run release` after changing `src/browser/` files.
 - `dist/` contains tsc output for the NPM package — also rebuilt by `npm run release`.
 - Both `docs/scripts/` and `dist/` should be committed (they are deployed artifacts).
