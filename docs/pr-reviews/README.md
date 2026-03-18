@@ -9,7 +9,6 @@ Each PR gets its own folder containing reviews from different reviewers:
 ```
 docs/pr-reviews/
 ├── README.md              <- You are here
-├── pr-55-review-notes.md  # Standalone review notes (legacy format)
 └── 60/                    # PR #60: Restore per-character detail view
     ├── claude.md          # Review by Claude Code
     ├── copilot.md         # Review by GitHub Copilot

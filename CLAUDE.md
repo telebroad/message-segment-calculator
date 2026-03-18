@@ -12,6 +12,8 @@ npm run lint:fix         # ESLint with auto-fix
 npm run check            # Lint + test (mirrors CI)
 npm run release          # Type-check + webpack build (outputs to docs/scripts/)
 npm run build            # Type-check only (tsc)
+npm run test:e2e         # Playwright e2e tests (serves docs/ locally)
+npm run test:e2e:ui      # Playwright interactive UI mode
 ```
 
 ## Project Structure
@@ -39,7 +41,9 @@ docs/                    # GitHub Pages site
   scripts/               # Built JS bundles (from webpack)
   styles/                # CSS (tokens.css, layout.css, components.css, animations.css)
   pr-reviews/            # 3-agent + 1-human PR review docs
-tests/                   # Jest test suites
+tests/                   # Test suites
+  *.test.js              # Jest unit tests
+  e2e/                   # Playwright e2e tests (char-detail.spec.ts, etc.)
 dist/                    # Built library output (tsc)
 ```
 
