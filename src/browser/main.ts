@@ -54,6 +54,7 @@ const init = (): void => {
     detailBytes: getElement('rcs-bytes-detail'),
     detailBilling: getElement('rcs-billing-detail'),
     charCount: getElement('rcs-char-count'),
+    richNote: getElement('rcs-rich-note'),
     warning: getElement('rcs-warning'),
   };
 

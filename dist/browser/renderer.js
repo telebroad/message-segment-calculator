@@ -197,11 +197,15 @@ var renderRcs = function (analysis, targets) {
         targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
         var suffix = analysis.segmentsCount === 1 ? '' : 's';
         targets.detailBilling.textContent = "".concat(analysis.segmentsCount, " Rich segment").concat(suffix);
+        targets.richNote.innerHTML =
+            '<strong>Note:</strong> This calculator applies to plain-text RCS messages, billed as <em>Rich</em> per 160-byte UTF-8 segment. <em>Rich Media</em> messages (cards with images, buttons, or multiple text fields) are billed at a flat per-message rate regardless of length. <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.';
     }
     else {
         targets.detailsText.textContent =
             'International destinations are billed as a single Basic (≤160) or Single (>160) message.';
         targets.detailBilling.textContent = "".concat(analysis.messageType, " message");
+        targets.richNote.innerHTML =
+            '<strong>Note:</strong> This calculator applies to plain-text RCS messages, billed as <em>Basic</em> (\u2264160 bytes) or <em>Single</em> (>160 bytes). <em>Rich Media</em> messages (cards with images, buttons, or multiple text fields) are billed at a flat per-message rate regardless of length. <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.';
     }
     targets.detailSize.textContent = "".concat(analysis.messageSize, " bits");
     targets.detailBytes.textContent = "".concat(analysis.characters, " bytes");

@@ -31,9 +31,9 @@ Restores the per-character detail view removed in the UI redesign (eb01913). Add
 
 ### Round 2 (re-review after fixes)
 
-- [ ] P2: **RCS billing note is static** (`docs/index.html:161`) — The `#rcs-rich-note` text says "billed as Rich per 160-byte segment" but this only applies to US destinations. When International is selected, the calculator output correctly shows Basic/Single billing while this note still claims Rich segmentation. Should be dynamic or qualified.
-- [ ] Non-blocker: **lint-staged engine mismatch** — `lint-staged@16.4.0` requires Node >=20.17 in its dependency chain. CI tests Node 16/18 without issue (lint-staged isn't invoked in CI), but `npm install --engine-strict` would fail on Node 18. Consider raising minimum to Node 18 or downgrading lint-staged.
-- [ ] Non-blocker: No unit tests for `charDetails` extraction (e2e tests cover this indirectly)
+- [x] P2: **RCS billing note is static** — FIXED: `renderRcs` now updates `#rcs-rich-note` dynamically based on region (Rich for US, Basic/Single for International)
+- [x] Non-blocker: **lint-staged engine mismatch** — FIXED: Dropped Node 16.x from CI matrix (EOL since Sept 2023). Matrix now [18, 20, 22], aligned with devDependency engine requirements.
+- [x] Non-blocker: **No unit tests for charDetails** — FIXED: Added `tests/charDetails.test.js` with 5 tests covering GSM-7/UCS-2 encoding, multi-segment indices, UDH filtering, and empty message
 
 ### Strengths
 - Clean three-layer separation (types -> segmenter -> renderer)
@@ -41,7 +41,7 @@ Restores the per-character detail view removed in the UI redesign (eb01913). Add
 - CSS custom properties from `tokens.css` for segment colors
 - a11y: `tabindex="0"`, `role="img"`, `aria-label`
 - 10 Playwright e2e tests cover the full manual test plan
-- All 659 unit tests + 10 e2e tests pass, CI green on all 4 Node versions
+- All 664 unit tests + 10 e2e tests pass, CI green on all Node versions
 
 ## Verdict
-**APPROVED** — Previous P2 bugs fixed. New P2 (static RCS note) is low-risk and can be addressed as a follow-up.
+**APPROVED** — All issues from both review rounds resolved.
