@@ -17,7 +17,7 @@ Restores the per-character detail view removed in the UI redesign (eb01913). Add
 - `docs/index.html` — Collapsible "Character detail" section, RCS info note
 - `docs/styles/tokens.css` — Segment palette CSS variables
 - `docs/styles/components.css` — `.char-block` styles, `.non-gsm` highlight
-- `.github/workflows/test.js.yml` — CI matrix `[16, 18, 20, 22]`
+- `.github/workflows/test.js.yml` — CI matrix `[20, 22]`
 - `tests/e2e/char-detail.spec.ts` — 10 Playwright e2e tests
 - `playwright.config.ts` — Playwright config with auto-serve
 - `package.json` — e2e scripts, jest ignore, husky/lint-staged
@@ -34,6 +34,10 @@ Restores the per-character detail view removed in the UI redesign (eb01913). Add
 - [x] P2: **RCS billing note is static** — FIXED: `renderRcs` now updates `#rcs-rich-note` dynamically based on region (Rich for US, Basic/Single for International)
 - [x] Non-blocker: **lint-staged engine mismatch** — FIXED: Dropped Node 16.x from CI matrix (EOL since Sept 2023). Matrix now [18, 20, 22], aligned with devDependency engine requirements.
 - [x] Non-blocker: **No unit tests for charDetails** — FIXED: Added `tests/charDetails.test.js` with 5 tests covering GSM-7/UCS-2 encoding, multi-segment indices, UDH filtering, and empty message
+
+### Round 3 (re-review after ESLint + no-var fixes)
+
+- [x] P2: **lint-staged@16 requires Node >=20.17, but CI includes Node 18** — FIXED: Dropped Node 18.x from CI matrix (EOL since April 2025). Matrix now [20, 22].
 
 ### Strengths
 - Clean three-layer separation (types -> segmenter -> renderer)

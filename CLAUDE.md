@@ -93,7 +93,7 @@ GitHub Actions runs on every PR to `main` (`.github/workflows/test.js.yml`):
 2. `npm run lint` — ESLint (prettier + twilio-ts rules)
 3. `npm test` — tsc + jest
 
-Matrix: Node 18.x, 20.x, 22.x
+Matrix: Node 20.x, 22.x
 
 Run `npm run check` locally to mirror CI before pushing.
 
