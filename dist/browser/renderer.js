@@ -99,7 +99,7 @@ var renderCharDetail = function (container, charDetails) {
         }
         var display = detail.raw.trim() === '' ? '\u00B7' : detail.raw;
         block.textContent = display;
-        var encoding = detail.isGSM7 ? 'GSM-7' : 'UCS-2';
+        var encoding = detail.messageEncoding;
         var codeHex = detail.codeUnits.map(function (u) { return "0x".concat(u.toString(16).toUpperCase().padStart(4, '0')); }).join(' ');
         var label = "".concat(encoding, " | Segment ").concat(detail.segmentIndex + 1, " | ").concat(codeHex);
         block.title = label;

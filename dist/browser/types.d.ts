@@ -11,6 +11,7 @@ export interface CharDetail {
     codeUnits: number[];
     isGSM7: boolean;
     segmentIndex: number;
+    messageEncoding: 'GSM-7' | 'UCS-2';
 }
 export interface SmsAnalysis {
     encoding: EncodingKind;

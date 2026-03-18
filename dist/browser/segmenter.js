@@ -28,6 +28,42 @@ var countSegmentUsed = function (segment) {
         return total + (item.codeUnits ? item.codeUnits.length : 0);
     }, 0);
 };
+var getCharCodeUnits = function (raw) {
+    var units = [];
+    for (var i = 0; i < raw.length; i++) {
+        units.push(raw.charCodeAt(i));
+    }
+    return units;
+};
+var extractCharDetails = function (segmentedMessage, encodingName) {
+    var charDetails = [];
+    segmentedMessage.segments.forEach(function (segment, segIdx) {
+        var e_1, _a;
+        try {
+            for (var segment_1 = __values(segment), segment_1_1 = segment_1.next(); !segment_1_1.done; segment_1_1 = segment_1.next()) {
+                var item = segment_1_1.value;
+                if (item.isReservedChar)
+                    continue;
+                var codeUnits = encodingName === 'UCS-2' && item.isGSM7 ? getCharCodeUnits(item.raw) : item.codeUnits || [];
+                charDetails.push({
+                    raw: item.raw,
+                    codeUnits: codeUnits,
+                    isGSM7: item.isGSM7,
+                    segmentIndex: segIdx,
+                    messageEncoding: encodingName,
+                });
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (segment_1_1 && !segment_1_1.done && (_a = segment_1.return)) _a.call(segment_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    });
+    return charDetails;
+};
 var analyzeSms = function (message, encoding, smartEncoding) {
     var segmentedMessage = new SegmentedMessage_1.SegmentedMessage(message, encoding, smartEncoding);
     var encodingName = segmentedMessage.encodingName, segmentsCount = segmentedMessage.segmentsCount;
@@ -40,30 +76,6 @@ var analyzeSms = function (message, encoding, smartEncoding) {
     }); });
     var lastSegment = segments[segments.length - 1];
     var remaining = lastSegment ? Math.max(0, capacity - lastSegment.used) : capacity;
-    var charDetails = [];
-    segmentedMessage.segments.forEach(function (segment, segIdx) {
-        var e_1, _a;
-        try {
-            for (var segment_1 = __values(segment), segment_1_1 = segment_1.next(); !segment_1_1.done; segment_1_1 = segment_1.next()) {
-                var item = segment_1_1.value;
-                if (item.isReservedChar)
-                    continue;
-                charDetails.push({
-                    raw: item.raw,
-                    codeUnits: item.codeUnits || [],
-                    isGSM7: item.isGSM7,
-                    segmentIndex: segIdx,
-                });
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (segment_1_1 && !segment_1_1.done && (_a = segment_1.return)) _a.call(segment_1);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-    });
     return {
         encoding: encodingKind,
         encodingLabel: encodingName === 'GSM-7' ? 'GSM-7' : 'Unicode (UCS-2)',
@@ -76,7 +88,7 @@ var analyzeSms = function (message, encoding, smartEncoding) {
         unicodeScalars: segmentedMessage.numberOfUnicodeScalars,
         nonGsmCharacters: segmentedMessage.getNonGsmCharacters(),
         warnings: segmentedMessage.warnings,
-        charDetails: charDetails,
+        charDetails: extractCharDetails(segmentedMessage, encodingName),
     };
 };
 exports.analyzeSms = analyzeSms;

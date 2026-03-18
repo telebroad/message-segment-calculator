@@ -27,6 +27,32 @@ const countSegmentUsed = (segment: SegmentElement[]): number => {
   }, 0);
 };
 
+const getCharCodeUnits = (raw: string): number[] => {
+  const units: number[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    units.push(raw.charCodeAt(i));
+  }
+  return units;
+};
+
+const extractCharDetails = (segmentedMessage: SegmentedMessage, encodingName: 'GSM-7' | 'UCS-2'): CharDetail[] => {
+  const charDetails: CharDetail[] = [];
+  segmentedMessage.segments.forEach((segment, segIdx) => {
+    for (const item of segment) {
+      if (item.isReservedChar) continue;
+      const codeUnits = encodingName === 'UCS-2' && item.isGSM7 ? getCharCodeUnits(item.raw) : item.codeUnits || [];
+      charDetails.push({
+        raw: item.raw,
+        codeUnits,
+        isGSM7: item.isGSM7,
+        segmentIndex: segIdx,
+        messageEncoding: encodingName,
+      });
+    }
+  });
+  return charDetails;
+};
+
 export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartEncoding: boolean): SmsAnalysis => {
   const segmentedMessage = new SegmentedMessage(message, encoding, smartEncoding);
   const { encodingName, segmentsCount } = segmentedMessage;
@@ -40,19 +66,6 @@ export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartE
   const lastSegment = segments[segments.length - 1];
   const remaining = lastSegment ? Math.max(0, capacity - lastSegment.used) : capacity;
 
-  const charDetails: CharDetail[] = [];
-  segmentedMessage.segments.forEach((segment, segIdx) => {
-    for (const item of segment) {
-      if (item.isReservedChar) continue;
-      charDetails.push({
-        raw: item.raw,
-        codeUnits: item.codeUnits || [],
-        isGSM7: item.isGSM7,
-        segmentIndex: segIdx,
-      });
-    }
-  });
-
   return {
     encoding: encodingKind,
     encodingLabel: encodingName === 'GSM-7' ? 'GSM-7' : 'Unicode (UCS-2)',
@@ -65,7 +78,7 @@ export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartE
     unicodeScalars: segmentedMessage.numberOfUnicodeScalars,
     nonGsmCharacters: segmentedMessage.getNonGsmCharacters(),
     warnings: segmentedMessage.warnings,
-    charDetails,
+    charDetails: extractCharDetails(segmentedMessage, encodingName),
   };
 };
 

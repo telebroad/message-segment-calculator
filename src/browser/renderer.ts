@@ -139,7 +139,7 @@ const renderCharDetail = (container: HTMLElement, charDetails: CharDetail[]): vo
     const display = detail.raw.trim() === '' ? '\u00B7' : detail.raw;
     block.textContent = display;
 
-    const encoding = detail.isGSM7 ? 'GSM-7' : 'UCS-2';
+    const encoding = detail.messageEncoding;
     const codeHex = detail.codeUnits.map((u) => `0x${u.toString(16).toUpperCase().padStart(4, '0')}`).join(' ');
     const label = `${encoding} | Segment ${detail.segmentIndex + 1} | ${codeHex}`;
     block.title = label;

@@ -89,7 +89,7 @@ GitHub Actions runs on every PR to `main` (`.github/workflows/test.js.yml`):
 2. `npm run lint` — ESLint (prettier + twilio-ts rules)
 3. `npm test` — tsc + jest
 
-Matrix: Node 14.x, 16.x, 18.x, 19.x
+Matrix: Node 16.x, 18.x, 20.x, 22.x
 
 Run `npm run check` locally to mirror CI before pushing.
 
@@ -104,7 +104,7 @@ Husky + lint-staged runs `eslint --fix` on staged `src/**/*.ts` files at commit 
 - **Branch naming**: `{type}/{TICKET-KEY}-{description}` (e.g., `feat/DEVED-13514-restore-char-detail-view`)
 - **PR auto-close**: Include JIRA ticket key in PR description
 - **Story points**: 1 (1-4 hrs), 2 (1-2 days), 3 (2-3 days), 5 (3-5 days)
-- **JIRA tooling**: Use `createJiraService()` from `~/Projects/deved-agents/src/services/jira-service.js` for programmatic ticket creation
+- **JIRA tooling**: Use `createJiraService()` from the deved-agents repo for programmatic ticket creation
 
 ## PR Workflow
 

@@ -11,8 +11,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x, 19.x]
+        node-version: [16.x, 18.x, 20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        # Node 14 removed — EOL since April 2023; husky 9.x requires >=16
 
     steps:
     - uses: actions/checkout@v3
