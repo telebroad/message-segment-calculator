@@ -24,6 +24,7 @@
     "lint:fix": "eslint --ext ts src/ --fix && eslint --config tests/.eslintrc tests/**/*.js --fix",
     "precheck": "npm run lint",
     "check": "npm test",
+    "start": "webpack --config webpack.config.js && http-server docs -o",
     "webpack": "webpack --config webpack.config.js",
     "release": "tsc && webpack --config webpack.config.js",
     "test:e2e": "npx playwright test",
