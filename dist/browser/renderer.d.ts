@@ -6,6 +6,7 @@ export interface SmsRenderTargets {
     segments: HTMLElement;
     remaining: HTMLElement;
     segmentTape: HTMLElement;
+    charDetailContainer: HTMLElement;
     encodingSummary: HTMLElement;
     messageSize: HTMLElement;
     totalSize: HTMLElement;
@@ -30,6 +31,7 @@ export interface RcsRenderTargets {
     detailBytes: HTMLElement;
     detailBilling: HTMLElement;
     charCount: HTMLElement;
+    richNote: HTMLElement;
     warning: HTMLElement;
 }
 export declare const renderSms: (analysis: SmsAnalysis, targets: SmsRenderTargets, errorMessage?: string) => void;

@@ -6,6 +6,13 @@ export interface SegmentData {
     capacity: number;
     used: number;
 }
+export interface CharDetail {
+    raw: string;
+    codeUnits: number[];
+    isGSM7: boolean;
+    segmentIndex: number;
+    messageEncoding: 'GSM-7' | 'UCS-2';
+}
 export interface SmsAnalysis {
     encoding: EncodingKind;
     encodingLabel: string;
@@ -18,6 +25,7 @@ export interface SmsAnalysis {
     unicodeScalars: number;
     nonGsmCharacters: string[];
     warnings: string[];
+    charDetails: CharDetail[];
 }
 export interface RcsAnalysis {
     encoding: EncodingKind;

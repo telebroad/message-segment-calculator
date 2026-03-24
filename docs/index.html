@@ -92,6 +92,11 @@
 
         <div class="segment-tape-container" id="sms-segment-tape"></div>
 
+        <details class="char-detail-section" id="sms-char-detail-section" open>
+          <summary>Character detail</summary>
+          <div class="char-detail-container" id="sms-char-detail" hidden></div>
+        </details>
+
         <details class="encoding-details" id="sms-details" open>
           <summary>Encoding details</summary>
           <div class="details-body">
@@ -151,6 +156,11 @@
               </label>
             </div>
           </div>
+        </div>
+        <div class="detail-info" id="rcs-rich-note">
+          <strong>Note:</strong> This calculator applies to plain-text RCS messages, billed as <em>Rich</em> per 160-byte UTF-8 segment.
+          <em>Rich Media</em> messages (cards with images, buttons, or multiple text fields) are billed at a flat per-message rate regardless of length.
+          <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.
         </div>
         <div class="stats-bar" id="rcs-stats" aria-live="polite">
           <div class="stat-chip encoding-badge" id="rcs-encoding-badge" data-encoding="rcs">

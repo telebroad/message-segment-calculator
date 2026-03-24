@@ -20,23 +20,51 @@
     "test": "tsc && jest",
     "build": "tsc",
     "dev": "tsc -w",
-    "lint": "eslint --ext ts src/",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "eslint --ext ts src/ && eslint --config tests/.eslintrc tests/**/*.js",
+    "lint:fix": "eslint --ext ts src/ --fix && eslint --config tests/.eslintrc tests/**/*.js --fix",
+    "precheck": "npm run lint",
+    "check": "npm test",
+    "start": "webpack --config webpack.config.js && http-server docs -o",
     "webpack": "webpack --config webpack.config.js",
-    "release": "tsc && webpack --config webpack.config.js"
+    "release": "tsc && webpack --config webpack.config.js",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "prepare": "husky"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/e2e/"
+    ]
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix"
+    ],
+    "tests/**/*.js": [
+      "eslint --config tests/.eslintrc --fix"
+    ]
   },
   "author": "gverni",
   "homepage": "https://twiliodeved.github.io/message-segment-calculator/",
   "license": "MIT",
+  "overrides": {
+    "flatted": "^3.4.0"
+  },
   "dependencies": {
     "grapheme-splitter": "^1.0.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^18.11.18",
     "chalk": "^4.1.2",
     "eslint": "^8.31.0",
     "eslint-config-twilio-ts": "^2.0.0",
+    "http-server": "^14.1.1",
+    "husky": "^9.1.7",
     "jest": "^29.3.1",
+    "lint-staged": "^16.4.0",
+    "terser-webpack-plugin": "^5.4.0",
     "ts-loader": "^9.2.5",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5",

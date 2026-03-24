@@ -37,6 +37,18 @@
   --color-segment-empty: #21262D;
   --color-segment-boundary: #F22F46;
 
+  /* Character detail segment palette */
+  --color-seg-0-bg: #1a3a5c;
+  --color-seg-0-fg: #CCE4FF;
+  --color-seg-1-bg: #1a3d2a;
+  --color-seg-1-fg: #D1FAE0;
+  --color-seg-2-bg: #3d2a1a;
+  --color-seg-2-fg: #FDDCC4;
+  --color-seg-3-bg: #3d3518;
+  --color-seg-3-fg: #FFF1B3;
+  --color-seg-4-bg: #2d1f3d;
+  --color-seg-4-fg: #E7DCFA;
+
   /* Spacing scale */
   --space-1: 4px;
   --space-2: 8px;

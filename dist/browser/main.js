@@ -24,6 +24,7 @@ var init = function () {
         segments: getElement('sms-segments'),
         remaining: getElement('sms-remaining'),
         segmentTape: getElement('sms-segment-tape'),
+        charDetailContainer: getElement('sms-char-detail'),
         encodingSummary: getElement('sms-encoding-explainer'),
         messageSize: getElement('sms-size'),
         totalSize: getElement('sms-total-size'),
@@ -48,6 +49,7 @@ var init = function () {
         detailBytes: getElement('rcs-bytes-detail'),
         detailBilling: getElement('rcs-billing-detail'),
         charCount: getElement('rcs-char-count'),
+        richNote: getElement('rcs-rich-note'),
         warning: getElement('rcs-warning'),
     };
     var updateAll = function () {

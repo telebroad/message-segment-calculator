@@ -39,3 +39,10 @@ typings/
 
 # Context files (not for commits)
 .context/
+
+# Claude Code user-specific settings
+.claude/settings.local.json
+
+# Playwright
+tests/e2e/results/
+tests/e2e/reports/

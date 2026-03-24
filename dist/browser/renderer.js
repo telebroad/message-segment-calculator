@@ -83,6 +83,32 @@ var renderSegmentTape = function (container, segments, labelPrefix, unitLabel) {
         container.appendChild(row);
     });
 };
+var SEGMENT_COLORS = ['seg-0', 'seg-1', 'seg-2', 'seg-3', 'seg-4'];
+var renderCharDetail = function (container, charDetails) {
+    clearChildren(container);
+    if (charDetails.length === 0) {
+        container.hidden = true;
+        return;
+    }
+    container.hidden = false;
+    charDetails.forEach(function (detail) {
+        var block = document.createElement('span');
+        block.className = "char-block ".concat(SEGMENT_COLORS[detail.segmentIndex % SEGMENT_COLORS.length]);
+        if (!detail.isGSM7) {
+            block.classList.add('non-gsm');
+        }
+        var display = detail.raw.trim() === '' ? '\u00B7' : detail.raw;
+        block.textContent = display;
+        var encoding = detail.messageEncoding;
+        var codeHex = detail.codeUnits.map(function (u) { return "0x".concat(u.toString(16).toUpperCase().padStart(4, '0')); }).join(' ');
+        var label = "".concat(encoding, " | Segment ").concat(detail.segmentIndex + 1, " | ").concat(codeHex);
+        block.title = label;
+        block.setAttribute('tabindex', '0');
+        block.setAttribute('role', 'img');
+        block.setAttribute('aria-label', "".concat(display === '\u00B7' ? 'whitespace' : display, ": ").concat(label));
+        container.appendChild(block);
+    });
+};
 var updateNonGsmTable = function (targets, nonGsmCharacters) {
     var uniqueCharacters = Array.from(new Set(nonGsmCharacters));
     clearChildren(targets.nonGsmTableBody);
@@ -114,6 +140,7 @@ var renderSms = function (analysis, targets, errorMessage) {
     targets.remaining.textContent = analysis.remaining.toString();
     targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
     renderSegmentTape(targets.segmentTape, analysis.segments, 'SMS', 'chars');
+    renderCharDetail(targets.charDetailContainer, analysis.charDetails);
     targets.messageSize.textContent = "".concat(analysis.messageSize, " bits");
     targets.totalSize.textContent = "".concat(analysis.totalSize, " bits");
     targets.unicodeScalars.textContent = analysis.unicodeScalars.toString();
@@ -157,10 +184,10 @@ exports.renderSms = renderSms;
 var renderRcs = function (analysis, targets) {
     targets.encodingBadge.setAttribute('data-encoding', analysis.encoding);
     targets.encodingValue.textContent = analysis.encodingLabel;
+    targets.messageType.textContent = analysis.messageType;
     targets.characters.textContent = analysis.characters.toString();
     targets.segments.textContent = analysis.segmentsCount.toString();
     targets.segments.classList.toggle('is-multi', analysis.segmentsCount > 1);
-    targets.messageType.textContent = analysis.messageType;
     targets.remaining.textContent = analysis.remaining.toString();
     targets.remaining.classList.toggle('is-low', analysis.remaining < 20);
     targets.size.textContent = "".concat(analysis.messageSize, " bits");
@@ -170,11 +197,15 @@ var renderRcs = function (analysis, targets) {
         targets.detailsText.textContent = 'US destinations are billed per 160 UTF-8 byte Rich segment.';
         var suffix = analysis.segmentsCount === 1 ? '' : 's';
         targets.detailBilling.textContent = "".concat(analysis.segmentsCount, " Rich segment").concat(suffix);
+        targets.richNote.innerHTML =
+            '<strong>Note:</strong> This calculator applies to plain-text RCS messages, billed as <em>Rich</em> per 160-byte UTF-8 segment. <em>Rich Media</em> messages (cards with images, buttons, or multiple text fields) are billed at a flat per-message rate regardless of length. <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.';
     }
     else {
         targets.detailsText.textContent =
             'International destinations are billed as a single Basic (≤160) or Single (>160) message.';
         targets.detailBilling.textContent = "".concat(analysis.messageType, " message");
+        targets.richNote.innerHTML =
+            '<strong>Note:</strong> This calculator applies to plain-text RCS messages, billed as <em>Basic</em> (\u2264160 bytes) or <em>Single</em> (>160 bytes). <em>Rich Media</em> messages (cards with images, buttons, or multiple text fields) are billed at a flat per-message rate regardless of length. <a href="https://www.twilio.com/docs/content/twiliocard" target="_blank" rel="noopener noreferrer">Learn more about RCS content types and pricing</a>.';
     }
     targets.detailSize.textContent = "".concat(analysis.messageSize, " bits");
     targets.detailBytes.textContent = "".concat(analysis.characters, " bytes");

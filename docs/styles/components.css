@@ -388,6 +388,20 @@ h2 {
   color: var(--color-error);
 }
 
+.detail-info {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.detail-info a {
+  color: var(--color-text-link);
+}
+
 .control-panel {
   display: flex;
   flex-direction: column;
@@ -466,6 +480,79 @@ h2 {
 .calculator-toggle:hover .toggle-indicator::before,
 .calculator-toggle:hover .toggle-indicator::after {
   background: var(--color-text-primary);
+}
+
+/* Character detail view */
+
+.char-detail-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.char-detail-section summary {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.char-detail-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.char-detail-section[open] summary {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.char-detail-container {
+  padding: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  line-height: 1;
+}
+
+.char-block {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: default;
+  border: 1px solid transparent;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.char-block:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  position: relative;
+}
+
+.char-block.seg-0 { background: var(--color-seg-0-bg); color: var(--color-seg-0-fg); }
+.char-block.seg-1 { background: var(--color-seg-1-bg); color: var(--color-seg-1-fg); }
+.char-block.seg-2 { background: var(--color-seg-2-bg); color: var(--color-seg-2-fg); }
+.char-block.seg-3 { background: var(--color-seg-3-bg); color: var(--color-seg-3-fg); }
+.char-block.seg-4 { background: var(--color-seg-4-bg); color: var(--color-seg-4-fg); }
+
+.char-block.non-gsm {
+  border-color: var(--color-error);
+  box-shadow: inset 0 0 0 1px var(--color-error);
+  color: var(--color-error);
 }
 
 .calculator-body {

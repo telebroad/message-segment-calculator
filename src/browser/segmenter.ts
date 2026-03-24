@@ -1,6 +1,6 @@
 import { SegmentedMessage } from '../libs/SegmentedMessage';
 import { RcsSegmentedMessage, RcsRegion } from '../libs/RcsSegmentedMessage';
-import type { SegmentData, SmsAnalysis, SmsEncodingSetting, RcsAnalysis } from './types';
+import type { SegmentData, SmsAnalysis, SmsEncodingSetting, RcsAnalysis, CharDetail } from './types';
 
 /*
  * Segment extends Array and contains EncodedChar | UserDataHeader elements.
@@ -25,6 +25,32 @@ const countSegmentUsed = (segment: SegmentElement[]): number => {
     }
     return total + (item.codeUnits ? item.codeUnits.length : 0);
   }, 0);
+};
+
+const getCharCodeUnits = (raw: string): number[] => {
+  const units: number[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    units.push(raw.charCodeAt(i));
+  }
+  return units;
+};
+
+const extractCharDetails = (segmentedMessage: SegmentedMessage, encodingName: 'GSM-7' | 'UCS-2'): CharDetail[] => {
+  const charDetails: CharDetail[] = [];
+  segmentedMessage.segments.forEach((segment, segIdx) => {
+    for (const item of segment) {
+      if (item.isReservedChar) continue;
+      const codeUnits = encodingName === 'UCS-2' && item.isGSM7 ? getCharCodeUnits(item.raw) : item.codeUnits || [];
+      charDetails.push({
+        raw: item.raw,
+        codeUnits,
+        isGSM7: item.isGSM7,
+        segmentIndex: segIdx,
+        messageEncoding: encodingName,
+      });
+    }
+  });
+  return charDetails;
 };
 
 export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartEncoding: boolean): SmsAnalysis => {
@@ -52,6 +78,7 @@ export const analyzeSms = (message: string, encoding: SmsEncodingSetting, smartE
     unicodeScalars: segmentedMessage.numberOfUnicodeScalars,
     nonGsmCharacters: segmentedMessage.getNonGsmCharacters(),
     warnings: segmentedMessage.warnings,
+    charDetails: extractCharDetails(segmentedMessage, encodingName),
   };
 };
 
