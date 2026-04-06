@@ -23,7 +23,12 @@ class EncodedChar {
     this.encoding = encoding;
     this.isGSM7 = Boolean(char && char.length === 1 && UnicodeToGsm[char.charCodeAt(0)]);
     if (this.isGSM7) {
-      this.codeUnits = UnicodeToGsm[char.charCodeAt(0)];
+      /*
+       * For GSM-7 characters in UCS-2 encoding, store the corresponding UCS-2/UTF-16
+       * code unit (one 16-bit unit per character) instead of the GSM-7 extension mapping
+       * (which uses 2 units for chars like |, ^, {).
+       */
+      this.codeUnits = encoding === 'UCS-2' ? [char.charCodeAt(0)] : UnicodeToGsm[char.charCodeAt(0)];
     } else {
       this.codeUnits = [];
       for (let i = 0; i < char.length; i++) {
